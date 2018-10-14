@@ -413,18 +413,30 @@ height:50vh;
 <li>转到hexo安装文件夹，打开命令行，输入 <code>hexo i blog</code></li>
 <li>等待安装完成之后，转到blog文件夹下</li>
 <li>输入 <code>hexo g</code> 和 <code>hexo s</code> 命令，分别生成静态页面和开启本地服务器</li>
-<li>打开命令行中提示的本地访问地址（应该都是localhost:4000的了），就可以看到样例博客了<h2 id="个性化"><a href="#个性化" class="headerlink" title="个性化"></a>个性化</h2>因为Hexo自带的主题感觉不是很好看（单纯想折腾），所以想要换个主题。我个人认为先在本地把自己想要的博客样式弄好之后再传到GitHub上面可能更好，不用每修改一次都需要push到GitHub上。<h3 id="1-更换主题"><a href="#1-更换主题" class="headerlink" title="1. 更换主题"></a>1. 更换主题</h3></li>
+<li>打开命令行中提示的本地访问地址（应该都是localhost:4000的了），就可以看到样例博客了</li>
+</ul>
+<h2 id="个性化"><a href="#个性化" class="headerlink" title="个性化"></a>个性化</h2><p>因为Hexo自带的主题感觉不是很好看（单纯想折腾），所以想要换个主题。我个人认为先在本地把自己想要的博客样式弄好之后再传到GitHub上面可能更好，不用每修改一次都需要push到GitHub上。</p>
+<h3 id="1-更换主题"><a href="#1-更换主题" class="headerlink" title="1. 更换主题"></a>1. 更换主题</h3><ul>
 <li>首先打开 <a href="https://hexo.io/themes/" target="_blank" rel="noopener">Hexo官方的主题页面</a>，上面有好多不同的主题任你挑选。</li>
 <li>挑选到合适的主题之后（以下以我安装的 <a href="http://firework.studio/archer-demo/" target="_blank" rel="noopener">Archer</a> 主题为例），点击进入该主题的示例网站<br><img src="screenshot/20181014/1.png" alt=""></li>
 <li>进入示例网站之后，会发现主题作者把这个主题的安装方法已经放在这个示例网站里面的了（应该都会放的，我看的几个都有放）<br><img src="screenshot/20181014/2.png" alt=""></li>
-<li>然后按照作者所写教程一步步安装即可,进一步的个性化就看自己了，这个主题基本能满足所有需求了吧<h2 id="部署到GitHub上"><a href="#部署到GitHub上" class="headerlink" title="部署到GitHub上"></a>部署到GitHub上</h2><h3 id="1-设置Git-Page"><a href="#1-设置Git-Page" class="headerlink" title="1. 设置Git Page"></a>1. 设置Git Page</h3>这个比较简单，百度一下就行了<h3 id="2-将本地博客部署到GitHub上"><a href="#2-将本地博客部署到GitHub上" class="headerlink" title="2. 将本地博客部署到GitHub上"></a>2. 将本地博客部署到GitHub上</h3></li>
+<li>然后按照作者所写教程一步步安装即可,进一步的个性化就看自己了，这个主题基本能满足所有需求了吧</li>
+</ul>
+<h2 id="部署到GitHub上"><a href="#部署到GitHub上" class="headerlink" title="部署到GitHub上"></a>部署到GitHub上</h2><h3 id="1-设置Git-Page"><a href="#1-设置Git-Page" class="headerlink" title="1. 设置Git Page"></a>1. 设置Git Page</h3><p>这个比较简单，百度一下就行了</p>
+<h3 id="2-将本地博客部署到GitHub上"><a href="#2-将本地博客部署到GitHub上" class="headerlink" title="2. 将本地博客部署到GitHub上"></a>2. 将本地博客部署到GitHub上</h3><ul>
 <li>输入命令 <code>npm install hexo-deployer-git --save</code> 安装一个帮助我们部署和发布博客的插件</li>
 <li>等插件安装好之后，使用命令 <code>hexo d</code> 将博客部署到GitHub上</li>
-<li>访问Git Page，看看是不是已经装上去了<h2 id="发布文章"><a href="#发布文章" class="headerlink" title="发布文章"></a>发布文章</h2>部署好了博客，发文章肯定是必须的啦<h3 id="1-安装插件并发布"><a href="#1-安装插件并发布" class="headerlink" title="1. 安装插件并发布"></a>1. 安装插件并发布</h3></li>
+<li>访问Git Page，看看是不是已经装上去了</li>
+</ul>
+<h2 id="发布文章"><a href="#发布文章" class="headerlink" title="发布文章"></a>发布文章</h2><p>部署好了博客，发文章肯定是必须的啦</p>
+<h3 id="1-安装插件并发布"><a href="#1-安装插件并发布" class="headerlink" title="1. 安装插件并发布"></a>1. 安装插件并发布</h3><ul>
 <li>输入命令 ‘hexo new “文件名”‘，就会自动在 <code>blog/source/_posts</code> 文件夹下。手动添加新的文章也可以</li>
 <li>编辑文章</li>
 <li>文章编辑完之后再次 ‘hexo g’ 和 ‘hexo d’</li>
-<li>对于本地服务器来说，每次更新博客外观或者更新文章，更改都是刷新下网页即时可见的；但是要使在Git Page上面生效，必须先输入 <code>hexo g</code> 命令再使用 <code>hexo d</code> 命令<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2>其实我基本都是按别的博客来做的，这里其实只是把其他博客再整理融合了一下而已2333，这里就直接放出我参考的各种博客吧</li>
+<li>对于本地服务器来说，每次更新博客外观或者更新文章，更改都是刷新下网页即时可见的；但是要使在Git Page上面生效，必须先输入 <code>hexo g</code> 命令再使用 <code>hexo d</code> 命令</li>
+</ul>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p>其实我基本都是按别的博客来做的，这里其实只是把其他博客再整理融合了一下而已2333，这里就直接放出我参考的各种博客吧</p>
+<ul>
 <li><a href="https://blog.csdn.net/Hoshea_chx/article/details/78826689" target="_blank" rel="noopener">用Hexo+GitHub搭建自己的博客</a> 这个博客非常的详细，我就是按着这个装的，基本没遇到什么问题，基本各个过程都涉及到了</li>
 <li><a href="https://hexo.io/themes/" target="_blank" rel="noopener">Hexo Theme</a></li>
 <li><a href="http://firework.studio/archer-demo/" target="_blank" rel="noopener">Archer主题示例网站</a></li>
@@ -438,7 +450,7 @@ height:50vh;
             <p>原文作者：<a href="http://yoursite.com">Henry Chan</a>
             <p>原文链接：<a href="http://yoursite.com/2018/10/14/如何利用Hexo搭建博客/">http://yoursite.com/2018/10/14/如何利用Hexo搭建博客/</a>
             <p>发表日期：<a href="http://yoursite.com/2018/10/14/如何利用Hexo搭建博客/">October 14th 2018, 8:10:23 pm</a>
-            <p>更新日期：<a href="http://yoursite.com/2018/10/14/如何利用Hexo搭建博客/">October 14th 2018, 9:06:57 pm</a>
+            <p>更新日期：<a href="http://yoursite.com/2018/10/14/如何利用Hexo搭建博客/">October 14th 2018, 9:10:52 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -624,8 +636,6 @@ top:50vh;
   </div>
         <div class="sidebar-panel-tags">
     <div class="sidebar-tags-name">
-    
-        <span class="sidebar-tag-name" data-tags="技术博客，Hexo"><span class="iconfont-archer">&#xe606;</span>技术博客，Hexo</span>
     
         <span class="sidebar-tag-name" data-tags="技术博客"><span class="iconfont-archer">&#xe606;</span>技术博客</span>
     
