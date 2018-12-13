@@ -428,7 +428,7 @@ height:50vh;
 <ul>
 <li>如果直接安装python3的话就是自带pip的了</li>
 <li>如果是用的envoy-alpine镜像，则包管理工具用的是apk</li>
-<li><strong>run.sh</strong><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/sh</span><br><span class="line">python svc1.py &amp;</span><br><span class="line">envoy -c /etc/envoy-config.yaml --service-cluster service1</span><br></pre></td></tr></table></figure>
+<li><strong>run.sh</strong><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/sh</span></span><br><span class="line">python svc1.py &amp;</span><br><span class="line">envoy -c /etc/envoy-config.yaml --service-cluster service1</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 </blockquote>
@@ -447,7 +447,7 @@ height:50vh;
 <p><strong>Attention</strong> 必须指定host=’0.0.0.0’，不然在宿主机中无法访问服务程序</p>
 </blockquote>
 <h4 id="2-1-3-运行"><a href="#2-1-3-运行" class="headerlink" title="2.1.3 运行"></a>2.1.3 运行</h4><ul>
-<li>执行docker-compose up —build -d</li>
+<li>执行docker-compose up –build -d</li>
 <li><p>执行curl localhost:9000或者用浏览器访问，可以收到admin server返回的数据</p>
 <ul>
 <li>使用curl访问</li>
@@ -473,11 +473,11 @@ height:50vh;
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">clusters:</span></span><br><span class="line"><span class="bullet">    -</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">"service1"</span></span><br><span class="line"><span class="attr">      connect_timeout:</span> <span class="string">"0.25s"</span></span><br><span class="line"><span class="attr">      type:</span> <span class="string">"static"</span></span><br><span class="line"><span class="attr">      lb_policy:</span> <span class="string">"ROUND_ROBIN"</span></span><br><span class="line"><span class="attr">      hosts:</span></span><br><span class="line"><span class="bullet">        -</span></span><br><span class="line"><span class="attr">          socket_address:</span></span><br><span class="line"><span class="attr">            address:</span> <span class="string">"127.0.0.1"</span></span><br><span class="line"><span class="attr">            port_value:</span> <span class="number">5000</span></span><br><span class="line"><span class="bullet">        -</span> <span class="comment"># 这里是新增的部分</span></span><br><span class="line"><span class="attr">          socket_address:</span></span><br><span class="line"><span class="attr">            address:</span> <span class="string">"127.0.0.1"</span></span><br><span class="line"><span class="attr">            port_value:</span> <span class="number">5001</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p><strong>run.sh</strong> 添加命令，当容器构建完成之后运行svc2</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/sh</span><br><span class="line">python svc1.py &amp;</span><br><span class="line">python svc2.py &amp;</span><br><span class="line">envoy -c /etc/envoy-config.yaml --service-cluster service1</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/sh</span></span><br><span class="line">python svc1.py &amp;</span><br><span class="line">python svc2.py &amp;</span><br><span class="line">envoy -c /etc/envoy-config.yaml --service-cluster service1</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 <h4 id="2-1-3-运行-1"><a href="#2-1-3-运行-1" class="headerlink" title="2.1.3 运行"></a>2.1.3 运行</h4><ul>
-<li>执行docker-compose up —build -d构建新的镜像</li>
+<li>执行docker-compose up –build -d构建新的镜像</li>
 <li>执行多次 curl localhost:8100,发现主机名和主机地址完全是一样的</li>
 </ul>
 <p><img src="/2018/12/03/envoy-3/7.png" alt=""></p>
@@ -526,10 +526,10 @@ height:50vh;
 <h4 id="2-4-1-Demo结构"><a href="#2-4-1-Demo结构" class="headerlink" title="2.4.1 Demo结构"></a>2.4.1 Demo结构</h4><p>这个Demo可能复杂一点，需要额外实现一个服务注册中心，并且需要解决服务注册问题。对于服务注册，这里应该是用简单的自注册方式来实现（其实跟用Curl这种粗暴的方法也没啥区别hhh）。这里直接返回固定的endpoint信息，而不搞什么数据库之类的东西了<br><img src="/2018/12/03/envoy-3/12.png" alt=""></p>
 <h4 id="2-4-2-配置文件"><a href="#2-4-2-配置文件" class="headerlink" title="2.4.2 配置文件"></a>2.4.2 配置文件</h4><ul>
 <li><p><strong>Dockerfile</strong></p>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> envoyproxy/envoy:latest</span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span> rm -f /etc/apt/sources.list # 删除旧的源列表</span><br><span class="line">ADD sources.list /etc/apt # 添加新的源列表，避免apt-get update命令报错</span><br><span class="line">ADD . /code</span><br><span class="line">WORKDIR /code</span><br><span class="line"></span><br><span class="line">RUN apt-get clean</span><br><span class="line">RUN apt-get update</span><br><span class="line">RUN apt-get install -y python2.7</span><br><span class="line">RUN apt-get install -y python-pip curl</span><br><span class="line">RUN python --version &amp;&amp; pip --version</span><br><span class="line">RUN pip install -r requirements.txt</span><br><span class="line">RUN chmod u+x run.sh</span><br><span class="line"></span><br><span class="line">ENTRYPOINT ./run.sh</span><br></pre></td></tr></table></figure>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> envoyproxy/envoy:latest</span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> rm -f /etc/apt/sources.list <span class="comment"># 删除旧的源列表</span></span></span><br><span class="line"><span class="bash">ADD sources.list /etc/apt <span class="comment"># 添加新的源列表，避免apt-get update命令报错</span></span></span><br><span class="line"><span class="bash">ADD . /code</span></span><br><span class="line"><span class="bash">WORKDIR /code</span></span><br><span class="line"><span class="bash"></span></span><br><span class="line"><span class="bash">RUN apt-get clean</span></span><br><span class="line"><span class="bash">RUN apt-get update</span></span><br><span class="line"><span class="bash">RUN apt-get install -y python2.7</span></span><br><span class="line"><span class="bash">RUN apt-get install -y python-pip curl</span></span><br><span class="line"><span class="bash">RUN python --version &amp;&amp; pip --version</span></span><br><span class="line"><span class="bash">RUN pip install -r requirements.txt</span></span><br><span class="line"><span class="bash">RUN chmod u+x run.sh</span></span><br><span class="line"><span class="bash"></span></span><br><span class="line"><span class="bash">ENTRYPOINT ./run.sh</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p><strong>run.sh</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/sh</span><br><span class="line">python svc1.py &amp;</span><br><span class="line">python svc2.py &amp;</span><br><span class="line">python eds-server.py &amp;</span><br><span class="line">envoy -c /etc/envoy-eds-config.yaml --service-cluster service1 -l debug # 使用Debug模式运行envoy可以看到更多的调试信息</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/sh</span></span><br><span class="line">python svc1.py &amp;</span><br><span class="line">python svc2.py &amp;</span><br><span class="line">python eds-server.py &amp;</span><br><span class="line">envoy -c /etc/envoy-eds-config.yaml --service-cluster service1 -l debug # 使用Debug模式运行envoy可以看到更多的调试信息</span><br></pre></td></tr></table></figure>
 </li>
 <li><p><strong>eds-server.py</strong><br>这是一个很简单的EDS server实现，没有涉及到数据库之类的东西，当收到envoy的查询请求之后就直接返回两个服务的地址和端口</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask,request,abort,jsonify</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/')</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">test</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">return</span> <span class="string">"Tests"</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route('/v2/discovery:endpoints',methods=['POST','GET'])</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">endPointList</span><span class="params">()</span>:</span></span><br><span class="line">    endpointList = &#123;</span><br><span class="line">        <span class="string">"version_info"</span>: <span class="string">"0"</span>,</span><br><span class="line">        <span class="string">"resources"</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">"@type"</span>: <span class="string">"type.googleapis.com/envoy.api.v2.ClusterLoadAssignment"</span>,</span><br><span class="line">                <span class="string">"cluster_name"</span>: <span class="string">"service1"</span>,</span><br><span class="line">                <span class="string">"endpoints"</span>:&#123;</span><br><span class="line">                    <span class="string">"lb_endpoints"</span>: [</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="string">"endpoint"</span>: &#123;</span><br><span class="line">                                <span class="string">"address"</span>: &#123;</span><br><span class="line">                                    <span class="string">"socket_address"</span>: &#123;</span><br><span class="line">                                        <span class="string">"address"</span>: <span class="string">"127.0.0.1"</span>,</span><br><span class="line">                                        <span class="string">"port_value"</span>: <span class="number">5001</span></span><br><span class="line">                                    &#125;</span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="string">"endpoint"</span>: &#123;</span><br><span class="line">                                <span class="string">"address"</span>: &#123;</span><br><span class="line">                                    <span class="string">"socket_address"</span>: &#123;</span><br><span class="line">                                        <span class="string">"address"</span>: <span class="string">"127.0.0.1"</span>,</span><br><span class="line">                                        <span class="string">"port_value"</span>: <span class="number">5000</span></span><br><span class="line">                                    &#125;</span><br><span class="line">                                &#125;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> jsonify(endpointList)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    app.run(host=<span class="string">'0.0.0.0'</span>,debug=<span class="keyword">True</span>,port=<span class="number">5100</span>)</span><br></pre></td></tr></table></figure>
@@ -542,7 +542,7 @@ height:50vh;
 </li>
 </ul>
 <h4 id="2-4-3-运行"><a href="#2-4-3-运行" class="headerlink" title="2.4.3 运行"></a>2.4.3 运行</h4><ul>
-<li>执行docker-compose up —build -d</li>
+<li>执行docker-compose up –build -d</li>
 <li><p>执行docker-compose logs service1，查看service1容器的日志<br><img src="/2018/12/03/envoy-3/13.png" alt=""></p>
 <ul>
 <li>可以看到一开始三个服务（svc1、svc2和eds-server）都已经正常启动</li>
@@ -593,6 +593,11 @@ height:50vh;
     <!-- paginator  -->
     <ul class="post-paginator">
         <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2018/12/10/envoy-4/" title= "[Envoy学习笔记]（四） 手动编译运行Envoy">
+                    <div class="nextTitle">[Envoy学习笔记]（四） 手动编译运行Envoy</div>
+                </a>
             
         </li>
         <li class="previous">
@@ -775,9 +780,20 @@ top:50vh;
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 5
+        Total : 6
         </div>
         <!-- search  -->
         
@@ -790,6 +806,11 @@ top:50vh;
     
     <div class="archive-year"> 2018 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/2018/12/10/envoy-4/" >[Envoy学习笔记]（四） 手动编译运行Envoy</a>
+        </li>
     
     
         <li class="archive-post-item">
