@@ -495,7 +495,7 @@ height:50vh;
 </ul>
 <h2 id="6-调试Envoy"><a href="#6-调试Envoy" class="headerlink" title="6. 调试Envoy"></a>6. 调试Envoy</h2><p>为了了解整个项目的执行流程，打断点往往是一个很好的方法，而这个项目又是用c++写的，所以用gdb来调试这个项目是最好不过了</p>
 <ul>
-<li>重新构建项目，因为之前构建的可执行文件是不包含调试信息的。重新构建时加上参数 –compilation_mode dbg</li>
+<li>重新构建项目，因为之前构建的可执行文件是不包含调试信息的。重新构建时加上参数 —compilation_mode dbg</li>
 <li>重新构建成功之后就可以用gdb打开envoy-static了</li>
 <li>要在envoy项目根下直接打开envoy-static才可以在gdb中看到代码，如果进入到bazel-bin/source/exe中再用gdb启动envoy-static是看不到源码的，可见 <a href="https://stackoverflow.com/questions/45812725/c-debugging-with-gdb-bazel-emacs" target="_blank" rel="noopener">C++ debugging with gdb &amp; bazel (&amp; emacs)</a></li>
 <li>这里是用了gdbtui，就是有界面的gdb吧。上面是列出来的源码，下面是调试命令输入窗口<br><img src="/2018/12/10/envoy-4/2.png" alt=""></li>
@@ -512,7 +512,7 @@ height:50vh;
 <h2 id="8-问题及解决办法"><a href="#8-问题及解决办法" class="headerlink" title="8. 问题及解决办法"></a>8. 问题及解决办法</h2><h3 id="8-1-Bazel卡死问题"><a href="#8-1-Bazel卡死问题" class="headerlink" title="8.1 Bazel卡死问题"></a>8.1 Bazel卡死问题</h3><ul>
 <li>换系统（从Centos换乘Ubuntu就好了）<br>下面这些事看起来有用，但是实际对我没用的办法</li>
 <li>删除Bazel缓存，重新构建（Bazel clean）</li>
-<li>关闭sandbox，Bazel构建命令添加参数–spawn_strategy standalone</li>
+<li>关闭sandbox，Bazel构建命令添加参数—spawn_strategy standalone</li>
 </ul>
 <h2 id="9-参考链接"><a href="#9-参考链接" class="headerlink" title="9. 参考链接"></a>9. 参考链接</h2><ul>
 <li><a href="https://github.com/envoyproxy/envoy/tree/master/bazel" target="_blank" rel="noopener">Building Envoy with Bazel</a></li>
