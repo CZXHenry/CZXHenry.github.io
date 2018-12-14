@@ -22,7 +22,7 @@
     <meta name="description" content="">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title>一个渣渣的碎碎念 · Henry&#39;s Studio</title>
+    <title>[Envoy学习笔记]（五） Envoy项目概述 · Henry&#39;s Studio</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -203,7 +203,7 @@
 </head>
 
     
-        <body class="about-body">
+        <body class="post-body">
     
     
 <header class="header">
@@ -211,6 +211,15 @@
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Henry&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">[Envoy学习笔记]（五） Envoy项目概述</a>
+            </div>
+    </div>
     
     <a class="home-link" href=/>Henry's Studio.</a>
 </header>
@@ -229,23 +238,69 @@ height:50vh;
     <!-- 主页  -->
     
     
+    <!-- 404页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/intro/about-bg.jpg)"></div>
+    <div class="site-intro-img" style="background-image: url(https://source.unsplash.com/random)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            一个渣渣的碎碎念
+            [Envoy学习笔记]（五） Envoy项目概述
+            <!-- 404 -->
             
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
             
+            
+            <!-- 404 -->
+            
         </p>
         <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Service Mesh">Service Mesh</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.6k</span>阅读时长: <span class="post-count reading-time">5 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2018/12/13</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
         
     </div>
 </div>
@@ -346,11 +401,113 @@ height:50vh;
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <!-- 不可以删除，否则会调用post的layout  -->
-<main class="main about-page">
+            <main class="main post-page">
     <article class="article-entry">
-        <h2 id="或许不是每件事都是我所热爱的，但是我依旧希望能够尽力做好每一件事"><a href="#或许不是每件事都是我所热爱的，但是我依旧希望能够尽力做好每一件事" class="headerlink" title="或许不是每件事都是我所热爱的，但是我依旧希望能够尽力做好每一件事"></a>或许不是每件事都是我所热爱的，但是我依旧希望能够尽力做好每一件事</h2>
+        <blockquote>
+<p>这一篇就是大概对GitHub上面官方文档的翻译以及整理，大概介绍了项目的文件组织</p>
+</blockquote>
+<h2 id="1-文档资料"><a href="#1-文档资料" class="headerlink" title="1. 文档资料"></a>1. 文档资料</h2><p>这里就列举一下比较重要的文档吧</p>
+<ul>
+<li><a href="https://www.envoyproxy.io/" target="_blank" rel="noopener">官方文档</a></li>
+<li><a href="http://www.servicemesher.com/envoy/" target="_blank" rel="noopener">非官方中文文档</a></li>
+<li>其余一些博客就是介绍Envoy的设计思路的</li>
+<li><a href="https://github.com/envoyproxy/envoy-perf" target="_blank" rel="noopener">envoy-perf</a> 用来测试Envoy的性能表现的</li>
+<li><a href="https://groups.google.com/forum/#!forum/envoy-dev" target="_blank" rel="noopener">Envoy Developer Group</a> 一个给开发者的Google论坛，基本没啥人在上面发言，但是应该有些有用的资料</li>
+<li><a href="https://github.com/envoyproxy/envoy/blob/master/DEVELOPER.md" target="_blank" rel="noopener">Developer Documentation</a> 官方写给开发者看的文档，基本是介绍了怎么构建、怎么测试之类的东西。最后还有些有关Envoy设计的介绍</li>
+<li><a href="https://github.com/envoyproxy/envoy/blob/master/STYLE.md" target="_blank" rel="noopener">C++代码规范文档</a></li>
+</ul>
+<h2 id="2-项目文件结构"><a href="#2-项目文件结构" class="headerlink" title="2. 项目文件结构"></a>2. 项目文件结构</h2><h3 id="2-1-最上层目录"><a href="#2-1-最上层目录" class="headerlink" title="2.1 最上层目录"></a>2.1 最上层目录</h3><ul>
+<li><strong>.circleci/:</strong> CircleCI的配置文件</li>
+<li><strong>api/:</strong> Envoy数据平面API</li>
+<li><strong>bazel/:</strong> 使用Bazel构建Envoy所需的文件以及文档</li>
+<li><strong>ci/:</strong> 持续集成或者创建Docker容器时会使用到的脚本</li>
+<li><strong>configs/:</strong> Envoy配置样例</li>
+<li><strong>docs/:</strong> 包含提供给使用Envoy代理和数据平面API的用户的文档，以及在发布项目时用于更新文档的脚本</li>
+<li><strong>examples/:</strong> 使用Docker和Docker Compose搭建的更完善的Envoy样例</li>
+<li><strong>include/:</strong> 包含Envoy核心中公有的接口头文件。一般来说，这些头文件几乎100%包含的都是抽象类。这里只有极少的非抽象类，只是出于对性能的考虑才会设计非抽象类。注意这里所说的“核心”其实也包括了一些“扩展”，比如HTTP连接管理器中的过滤器或者一些Envoy很基础的不会再编译时当做可选项的功能</li>
+<li><strong>restarter/:</strong> 用Python封装的Envoy热重启器</li>
+<li><strong>source/:</strong> Envoy核心以及扩展的源代码。接下来会再介绍这个文件夹的文件结构</li>
+<li><strong>support/:</strong> 帮助开发的脚本</li>
+<li><strong>test/:</strong> 对Envoy核心和扩展的测试代码。接下来会再介绍这个文件夹的文件结构</li>
+<li><strong>tools/:</strong> 各种各样的工具。（这个文件夹还不是很完善，好多脚本都没有介绍的，但是看起来像是还有点用的样子）<h3 id="2-2-source-文件夹"><a href="#2-2-source-文件夹" class="headerlink" title="2.2 source/文件夹"></a>2.2 source/文件夹</h3></li>
+<li><strong>common/:</strong> Envoy核心代码。也就是说如果Envoy被封装成为一个库的时候这些代码都会被用到的<blockquote>
+<p><strong>Attention</strong> 官方文档中第一句是这样说的Core Envoy code (not specific to extensions) that is also not specific to a standalone server implementation. 但是我没有理解这句话是什么意思，所以先把原文放这</p>
+</blockquote>
+</li>
+<li><strong>docs/:</strong> 跟官方文档无关的杂乱的开发或者设计文档</li>
+<li><strong>exe/:</strong> 针对构建最终Envoy服务器二进制文件的源码。这些是仅有的不与集成和单元测试共享的代码</li>
+<li><strong>extensions/:</strong> Envoy核心代码的扩展。接下来会再介绍这个文件夹的文件结构</li>
+<li><strong>server/:</strong> 针对启动Envoy的代码。例如配置、服务器启动、工作线程等等。随着时间推移，common/和server/之间的划分也模糊了。希望大家能够认真分辨代码应该放在common/还是server/中<blockquote>
+<p><strong>Attention</strong> 原文的Code specific to running Envoy as a standalone server不太明白</p>
+</blockquote>
+<h3 id="2-3-test-文件夹"><a href="#2-3-test-文件夹" class="headerlink" title="2.3 test/文件夹"></a>2.3 test/文件夹</h3>这里不会详细描述test文件夹中的所有目录，只会描述一些重点的</li>
+<li>名字与source中的目录对应的目录包含了单元测试，比如common/、exe/和server/</li>
+<li>扩展对应的测试也放在extensions/中</li>
+<li>integration/目录包含端到端集成测试，这些测试模拟了比较真实的Envoy使用环境，包括了模拟的下游客户和上游服务器。集成测试同样测试了这个仓库中的一些扩展。需要注意的是以后我们更希望有能够单纯针对扩展的集成测试，而不需要覆盖Envoy核心功能。<blockquote>
+<p><strong>Attention</strong> 原文Those integration tests will likely end up in the extensions/ directory but further work and thinking is required before we get to that point.意思未明</p>
+</blockquote>
+</li>
+<li>mocks/ 包含了所有include/文件夹中Envoy核心接口的模拟实现</li>
+<li>其他目录包含了用于配置测试、覆盖测试、模糊测试和常见的测试代码等<h3 id="2-4-source-extenstions文件夹"><a href="#2-4-source-extenstions文件夹" class="headerlink" title="2.4 source/extenstions文件夹"></a>2.4 source/extenstions文件夹</h3>我们为扩展保留了特别的代码和命名空间。这些特别的代码和命名空间能够帮助发现代码和扩展，并且允许我们以后能够更加方便的使用OWNERS文件去缩放我们的扩展管理器。（在写这个文档的时候，这些都是还没有实现的，不过在计划进行中了）</li>
+<li>所有的扩展都在all_extensions.bzl或者extensions_build_config.bzl这两个文件中注册。前者包含的是不能从Envoy中移除的扩展，后者包含的是能够从Envoy构建中移除的。阅读bazel/README.md可以知道怎么在编译Envoy时移除一些扩展。需要注意的是，默认来说扩展都应该是能够移除的，除非有很重要的原因</li>
+<li>下面这些就是extension目录的和相关的命名空间<ul>
+<li><strong>access_loggers/:</strong> 日志输出实现，使用 <strong>Envoy::Extensions::AccessLoggers</strong> 命名空间</li>
+<li><strong>filters/http/:</strong> HTTP L7过滤器，使用 <strong>Envoy::Extensions::HttpFilters</strong> 命名空间</li>
+<li><strong>filters/listener/:</strong> 监听器过滤器，使用 <strong>Envoy::Extensions::ListenerFilters</strong> 命名空间</li>
+<li><strong>grpc_credentials/:</strong> 定制的gRPC证书，使用 <strong>Envoy::Extensions::GrpcCredentials</strong> 命名空间</li>
+<li><strong>health_checker/:</strong> 定制的健康检查器，使用 <strong>Envoy::Extensions::HealthCheckers</strong> 命名空间</li>
+<li><strong>resolvers/:</strong> 网络地址解析器，使用 <strong>Envoy::Extenstions::Resolvers</strong> 命名空间</li>
+<li><strong>stat_sinks/:</strong> Stat Sink实现，使用 <strong>Envoy::Extenstions::StatSinks</strong> 命名空间</li>
+<li><strong>tracers/:</strong> 跟踪器，使用 <strong>Envoy::Extensions::Tracers</strong> 命名空间</li>
+<li><strong>transport_socket/:</strong> 传输套接字实现，使用 <strong>Envoy::Extensions::Tracers</strong> 命名空间</li>
+</ul>
+</li>
+<li>每个扩展都是全部包含于它自己的命名空间中，例如 <strong>Envoy::Extensions::NetworkFilters::Echo</strong></li>
+<li>会被多个扩展使用到的公共代码应该包含在 common/ 文件夹中。例如，filters/common/ 保存了用于http过滤器和网络过滤器的公用代码。 两个不同的HTTP过滤器都使用到的代码应该包含在 filters/http/common/ 中。公共代码应该包含在公共命名空间中。比如 <strong>Envoy::Extensions::Filters::Common</strong></li>
+</ul>
+<blockquote>
+<p><strong>后记</strong> 这一篇博文基本没有什么东西，都是对官方资料的整理和翻译。翻译这工作真的不好做，很多地方都不会或者不知道表达出那种意思，果然还是我太菜了。</p>
+</blockquote>
+
     </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://czxhenry.github.io">Henry Chan</a>
+            <p>原文链接：<a href="http://czxhenry.github.io/2018/12/13/envoy-5/">http://czxhenry.github.io/2018/12/13/envoy-5/</a>
+            <p>发表日期：<a href="http://czxhenry.github.io/2018/12/13/envoy-5/">December 13th 2018, 7:14:39 pm</a>
+            <p>更新日期：<a href="http://czxhenry.github.io/2018/12/13/envoy-5/">December 14th 2018, 2:51:50 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/12/10/envoy-4/" title= "[Envoy学习笔记]（四） 手动编译运行Envoy">
+                    <div class="prevTitle">[Envoy学习笔记]（四） 手动编译运行Envoy</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
 </main>
             <!-- profile -->
             
@@ -428,6 +585,24 @@ height:50vh;
 </footer>
     </div>
     <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-文档资料"><span class="toc-number">1.</span> <span class="toc-text">1. 文档资料</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-项目文件结构"><span class="toc-number">2.</span> <span class="toc-text">2. 项目文件结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-最上层目录"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 最上层目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-source-文件夹"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 source/文件夹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-test-文件夹"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 test/文件夹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-source-extenstions文件夹"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 source/extenstions文件夹</span></a></li></ol></li></ol>
+    </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
@@ -645,6 +820,8 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
      
     <script type="text/x-mathjax-config">
     MathJax.Hub.Config({

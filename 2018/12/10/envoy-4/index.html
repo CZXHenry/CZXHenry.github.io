@@ -472,7 +472,7 @@ height:50vh;
 <ul>
 <li>将envoy-static、python程序和envoy配置文件放到一起</li>
 <li><p>修改一下之前用的run.sh脚本</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/sh</span><br><span class="line">python svc1.py &amp;</span><br><span class="line">python svc2.py &amp;</span><br><span class="line">python eds-server.py &amp;</span><br><span class="line">./envoy-static -c envoy-eds-config.yaml --service-cluster service1 -l debug</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/sh</span></span><br><span class="line">python svc1.py &amp;</span><br><span class="line">python svc2.py &amp;</span><br><span class="line">python eds-server.py &amp;</span><br><span class="line">./envoy-static -c envoy-eds-config.yaml --service-cluster service1 -l debug</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>运行run.sh脚本</p>
 </li>
@@ -495,7 +495,7 @@ height:50vh;
 </ul>
 <h2 id="6-调试Envoy"><a href="#6-调试Envoy" class="headerlink" title="6. 调试Envoy"></a>6. 调试Envoy</h2><p>为了了解整个项目的执行流程，打断点往往是一个很好的方法，而这个项目又是用c++写的，所以用gdb来调试这个项目是最好不过了</p>
 <ul>
-<li>重新构建项目，因为之前构建的可执行文件是不包含调试信息的。重新构建时加上参数 —compilation_mode dbg</li>
+<li>重新构建项目，因为之前构建的可执行文件是不包含调试信息的。重新构建时加上参数 –compilation_mode dbg</li>
 <li>重新构建成功之后就可以用gdb打开envoy-static了</li>
 <li>要在envoy项目根下直接打开envoy-static才可以在gdb中看到代码，如果进入到bazel-bin/source/exe中再用gdb启动envoy-static是看不到源码的，可见 <a href="https://stackoverflow.com/questions/45812725/c-debugging-with-gdb-bazel-emacs" target="_blank" rel="noopener">C++ debugging with gdb &amp; bazel (&amp; emacs)</a></li>
 <li>这里是用了gdbtui，就是有界面的gdb吧。上面是列出来的源码，下面是调试命令输入窗口<br><img src="/2018/12/10/envoy-4/2.png" alt=""></li>
@@ -512,7 +512,7 @@ height:50vh;
 <h2 id="8-问题及解决办法"><a href="#8-问题及解决办法" class="headerlink" title="8. 问题及解决办法"></a>8. 问题及解决办法</h2><h3 id="8-1-Bazel卡死问题"><a href="#8-1-Bazel卡死问题" class="headerlink" title="8.1 Bazel卡死问题"></a>8.1 Bazel卡死问题</h3><ul>
 <li>换系统（从Centos换乘Ubuntu就好了）<br>下面这些事看起来有用，但是实际对我没用的办法</li>
 <li>删除Bazel缓存，重新构建（Bazel clean）</li>
-<li>关闭sandbox，Bazel构建命令添加参数—spawn_strategy standalone</li>
+<li>关闭sandbox，Bazel构建命令添加参数–spawn_strategy standalone</li>
 </ul>
 <h2 id="9-参考链接"><a href="#9-参考链接" class="headerlink" title="9. 参考链接"></a>9. 参考链接</h2><ul>
 <li><a href="https://github.com/envoyproxy/envoy/tree/master/bazel" target="_blank" rel="noopener">Building Envoy with Bazel</a></li>
@@ -537,6 +537,11 @@ height:50vh;
     <!-- paginator  -->
     <ul class="post-paginator">
         <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2018/12/13/envoy-5/" title= "[Envoy学习笔记]（五） Envoy项目概述">
+                    <div class="nextTitle">[Envoy学习笔记]（五） Envoy项目概述</div>
+                </a>
             
         </li>
         <li class="previous">
@@ -730,9 +735,22 @@ top:50vh;
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 6
+        Total : 7
         </div>
         <!-- search  -->
         
@@ -745,6 +763,11 @@ top:50vh;
     
     <div class="archive-year"> 2018 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span><a class="archive-post-title" href= "/2018/12/13/envoy-5/" >[Envoy学习笔记]（五） Envoy项目概述</a>
+        </li>
     
     
         <li class="archive-post-item">
