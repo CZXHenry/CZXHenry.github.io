@@ -472,7 +472,7 @@ height:50vh;
 <ul>
 <li>将envoy-static、python程序和envoy配置文件放到一起</li>
 <li><p>修改一下之前用的run.sh脚本</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/sh</span></span><br><span class="line">python svc1.py &amp;</span><br><span class="line">python svc2.py &amp;</span><br><span class="line">python eds-server.py &amp;</span><br><span class="line">./envoy-static -c envoy-eds-config.yaml --service-cluster service1 -l debug</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>!/bin/sh</span><br><span class="line">python svc1.py &amp;</span><br><span class="line">python svc2.py &amp;</span><br><span class="line">python eds-server.py &amp;</span><br><span class="line">./envoy-static -c envoy-eds-config.yaml --service-cluster service1 -l debug</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>运行run.sh脚本</p>
 </li>
@@ -748,9 +748,14 @@ top:50vh;
     
     
     
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 7
+        Total : 8
         </div>
         <!-- search  -->
         
@@ -763,6 +768,11 @@ top:50vh;
     
     <div class="archive-year"> 2018 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/2018/12/24/envoy-6/" >envoy-6</a>
+        </li>
     
     
         <li class="archive-post-item">
