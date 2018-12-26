@@ -22,7 +22,7 @@
     <meta name="description" content="">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title>envoy-6 · Henry&#39;s Studio</title>
+    <title>[Envoy学习笔记]（六） Envoy启动流程 · Henry&#39;s Studio</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -217,7 +217,7 @@
                 <a href="/" >Henry&#39;s Studio.</a>
             </div>
             <div class="post-title">
-                <a href="#" class="post-name">envoy-6</a>
+                <a href="#" class="post-name">[Envoy学习笔记]（六） Envoy启动流程</a>
             </div>
     </div>
     
@@ -247,7 +247,7 @@ height:50vh;
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            envoy-6
+            [Envoy学习笔记]（六） Envoy启动流程
             <!-- 404 -->
             
         </h1>
@@ -264,9 +264,17 @@ height:50vh;
             <div class="post-intros">
                 <!-- 文章页标签  -->
                 
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "ServiceMesh">ServiceMesh</a>
+    
+</div>
+                
                 
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">0</span>阅读时长: <span class="post-count reading-time">1 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">1.6k</span>阅读时长: <span class="post-count reading-time">6 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
@@ -395,7 +403,60 @@ height:50vh;
         <div class="container container-unloaded">
             <main class="main post-page">
     <article class="article-entry">
-        
+        <blockquote>
+<p>终于开始看Envoy源码了，对于从来没有看过什么项目源码的我来说真是头痛，特别是Envoy还是用了很多C++新特性来写的。硬着头皮看，加上网上一些稀少的资料，大概也懂了一些了。现在就写一个阶段性的总结，可能错漏的地方比较多，因为我自己理解的也不是很到位。除此之外，还需要注意的就是，GitHub上面的源码经常会更新，所以在这看到的跟在GitHub上面看到的有不同很正常。我看了几天才突然想起这个事，所以也没有下载他们放在release的源码来看直接pull仓库的代码来看了，不管了，应该差不了很远</p>
+</blockquote>
+<p>Envoy的执行过程大致可以分为初始化和启动两个过程</p>
+<h2 id="1-初始化"><a href="#1-初始化" class="headerlink" title="1. 初始化"></a>1. 初始化</h2><h3 id="1-1-Main函数"><a href="#1-1-Main函数" class="headerlink" title="1.1 Main函数"></a>1.1 Main函数</h3><ul>
+<li><p>Envoy程序的Main函数在source/exe/main.cc中 </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    main_common = <span class="built_in">std</span>::make_unique&lt;Envoy::MainCommon&gt;(argc, argv);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>main.cc</strong>: 这里声明了一个指向MainCommon对象的unique_ptr，MainCommon的构造函数中负责完成各个模块的初试化</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MainCommon</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  MainCommon(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span>* <span class="keyword">const</span>* argv);</span><br><span class="line">  ...</span><br><span class="line">  MainCommonBase base_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">MainCommon::MainCommon(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span>* <span class="keyword">const</span>* argv)</span><br><span class="line">    : options_(argc, argv, &amp;MainCommon::hotRestartVersion, spdlog::level::info),</span><br><span class="line">      base_(options_, real_time_system_, default_test_hooks_, prod_component_factory_,</span><br><span class="line">            <span class="built_in">std</span>::make_unique&lt;Runtime::RandomGeneratorImpl&gt;(), platform_impl_.threadFactory()) &#123;&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p><strong>main_common.cc</strong>: MainCommon类包含了一个MainCommonBase的对象。通过查看MainCommon类的构造函数，可以发现构造函数中并没有执行什么初始化之类的东西。</p>
+</li>
+<li><p><strong>main_common.cc</strong>: 而通过查看MainCommonBase的构造函数可以得知，更多的工作是在这里完成的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">MainCommonBase::MainCommonBase(OptionsImpl&amp; options, Event::TimeSystem&amp; time_system,</span><br><span class="line">                               TestHooks&amp; test_hooks, Server::ComponentFactory&amp; component_factory,</span><br><span class="line">                               <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Runtime::RandomGenerator&gt;&amp;&amp; random_generator,</span><br><span class="line">                               Thread::ThreadFactory&amp; thread_factory)</span><br><span class="line">    : options_(options), component_factory_(component_factory), thread_factory_(thread_factory) &#123;</span><br><span class="line">  </span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化线程本地内存</span></span><br><span class="line">    tls_ = <span class="built_in">std</span>::make_unique&lt;ThreadLocal::InstanceImpl&gt;();</span><br><span class="line">    Thread::BasicLockable&amp; log_lock = restarter_-&gt;logLock();</span><br><span class="line">    Thread::BasicLockable&amp; access_log_lock = restarter_-&gt;accessLogLock();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取本地IP地址</span></span><br><span class="line">    <span class="keyword">auto</span> local_address = Network::Utility::getLocalAddress(options_.localAddressIpVersion());</span><br><span class="line">    logging_context_ =</span><br><span class="line">        <span class="built_in">std</span>::make_unique&lt;Logger::Context&gt;(options_.logLevel(), options_.logFormat(), log_lock);</span><br><span class="line"></span><br><span class="line">    configureComponentLogLevels();</span><br><span class="line"></span><br><span class="line">    stats_store_ = <span class="built_in">std</span>::make_unique&lt;Stats::ThreadLocalStoreImpl&gt;(options_.statsOptions(),</span><br><span class="line">                                                                 restarter_-&gt;statsAllocator());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化一个Server</span></span><br><span class="line">    <span class="comment">// 对于这个server_对象，我个人的理解就是一个在主线程负责监听器管理、集群管理等等的一个管理器</span></span><br><span class="line">    server_ = <span class="built_in">std</span>::make_unique&lt;Server::InstanceImpl&gt;(</span><br><span class="line">        options_, time_system, local_address, test_hooks, *restarter_, *stats_store_,</span><br><span class="line">        access_log_lock, component_factory, <span class="built_in">std</span>::move(random_generator), *tls_, thread_factory);</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Main函数中的初始化大概就是这样了。实际上这里感觉写的有点绕，Main函数调用MainCommon类对象，MainCommon类对象又调用MainCommonBase对象才进行真正的初试化部分，想不懂为什么多搞一层间接。看了下源代码里面的注释，好像开发者也觉得没什么必要多搞这一层，会删除掉MainCommon类，然后直接调用MainCommonBase类对象。</p>
+<h3 id="1-2-读取配置"><a href="#1-2-读取配置" class="headerlink" title="1.2 读取配置"></a>1.2 读取配置</h3></li>
+<li><strong>main.cc</strong>: 回到Main函数中，可以看到Main函数中使用make_unique创建指向MainCommon对象的时候将在命令行中启动envoy时输入的参数传了进去。</li>
+<li><strong>main_common.cc</strong>: MainCommon的构造函数，则会使用这两个参数来初始化options_对象。</li>
+<li><strong>option_impl.cc</strong>: 两个文件可以看到OptionsImpl中储存了各种envoy命令的参数。而OptionsImpl的构造函数则解析命令行传进来的参数。注意，这个时候单纯是对命令行命令进行解析而已，还没有读取yaml文件</li>
+<li><strong>main_common.cc</strong>: 回过头再看MainCommon的构造函数，发现base_对象是利用options_来进行初始化的。即options_初始化完之后再传给MainCommonBase的构造函数做进一步的读取配置。然后看MainCommonBase的构造函数，可以发现MainCommonBase同样包含了一个OptionImpl对象，所以直接使用传进来的Options对象来进行拷贝构造。一直看下去，可以看到这里并没有读取yaml文件中的配置，而是用来进行了一些简单的判断，之后就把options_传给server_对象了</li>
+<li><strong>server.cc</strong>: <ul>
+<li>server_是InstanceImpl类对象。InstanceImpl构造函数并没有做很多的初始化，更多的工作是在Initialize函数中完成的。</li>
+<li>Initialize函数中调用了InstanceUtil::loadBootstrapConfig函数来读取yaml文件中的配置。这里的配置全部读取到一个boostrap_对象中。这个对象的类型是envoy::config::bootstrap::v2::Bootstrap，这个类型是自动生成的。因为Envoy使用protobuf作为数据交换的格式，Envoy定义了boostrap.proto文件，而利用这个文件就可以生成对应的C++类了。</li>
+<li>loadBootstrapConfig中先读取yaml文件中的配置到一个对象中，然后再利用这个对象来初始化boostrap_。需要注意Envoy有v1、v2 API之分，这个函数里面是对使用了不同版本API的配置文件进行了判断的。</li>
+</ul>
+</li>
+<li>配置读取的流程大概就是这样了<h3 id="1-3-主线程初始化"><a href="#1-3-主线程初始化" class="headerlink" title="1.3 主线程初始化"></a>1.3 主线程初始化</h3></li>
+<li><strong>server.cc</strong>: 主线程大部分的模块都是在Instance::initialize函数中完成初始化的，比如数据统计模块、监听器管理器（listener manager）和线程本地储存模块等<h2 id="2-启动"><a href="#2-启动" class="headerlink" title="2. 启动"></a>2. 启动</h2><h3 id="2-1-主线程启动"><a href="#2-1-主线程启动" class="headerlink" title="2.1 主线程启动"></a>2.1 主线程启动</h3></li>
+<li><strong>main.cc</strong>: 调用MainCommon类中的run函数</li>
+<li><strong>main_common.cc</strong>: <ul>
+<li>MainCommon类的run函数直接调用MainCommonBase类的run函数</li>
+<li>在MainCommonBase的run函数中，调用了InstanceImpl::run函数。<h3 id="2-2-启动Worker线程"><a href="#2-2-启动Worker线程" class="headerlink" title="2.2 启动Worker线程"></a>2.2 启动Worker线程</h3></li>
+</ul>
+</li>
+<li><strong>server.cc</strong>: <ul>
+<li>InstanceImpl::run函数中声明了一个RunHelper类对象，并在调用构造函数的时候传入了一个lambda函数，在这个lambda函数里面调用了startWorkers函数</li>
+<li>startWorkers函数中又调用了ListenerManager类的成员函数startWorkers</li>
+</ul>
+</li>
+<li><strong>listener_manager_impl.cc</strong>: 在ListenerManager::startWorkers函数中，envoy将每个worker线程都与所有的监听器进行绑定。  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">void</span> ListenerManagerImpl::startWorkers(GuardDog&amp; guard_dog) &#123;</span><br><span class="line">ENVOY_LOG(info, <span class="string">"all dependencies initialized. starting workers"</span>);</span><br><span class="line">ASSERT(!workers_started_);</span><br><span class="line">workers_started_ = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; worker : workers_) &#123;</span><br><span class="line">  ASSERT(warming_listeners_.empty());</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; listener : active_listeners_) &#123;</span><br><span class="line">      <span class="comment">// 将所有的Listener都绑定到所有的Worker线程上</span></span><br><span class="line">    addListenerToWorker(*worker, *listener);</span><br><span class="line">  &#125;</span><br><span class="line">  worker-&gt;start(guard_dog);</span><br><span class="line">&#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>这样所有的listener都被绑定到了每一个Worker上，任意一个worker线程都可以负责处理某个监听器监听到的连接。至此整个Envoy就开始运行起来并开始监听连接请求了</p>
+<h2 id="3-参考链接"><a href="#3-参考链接" class="headerlink" title="3. 参考链接"></a>3. 参考链接</h2><ul>
+<li><a href="https://blog.csdn.net/surlymo/article/details/82191875" target="_blank" rel="noopener">【Servicemesh系列】【Envoy源码解析（一）】Envoy启动</a></li>
+</ul>
+<blockquote>
+<p><strong>后记</strong> 不得不说直接看源码真的是一件很吃力的事，这一篇文章只是笼统的介绍了Envoy的大致启动流程。接下来的一系列博客会详细记录Envoy中某个功能点具体是怎么实现的（比如xDS怎么实现的，listener怎么完成监听的，流量是怎么完成转发的）</p>
+</blockquote>
+
     </article>
     <!-- license  -->
     
@@ -403,7 +464,7 @@ height:50vh;
             <p>原文作者：<a href="http://czxhenry.github.io">Henry Chan</a>
             <p>原文链接：<a href="http://czxhenry.github.io/2018/12/24/envoy-6/">http://czxhenry.github.io/2018/12/24/envoy-6/</a>
             <p>发表日期：<a href="http://czxhenry.github.io/2018/12/24/envoy-6/">December 24th 2018, 8:25:35 pm</a>
-            <p>更新日期：<a href="http://czxhenry.github.io/2018/12/24/envoy-6/">December 24th 2018, 8:25:35 pm</a>
+            <p>更新日期：<a href="http://czxhenry.github.io/2018/12/24/envoy-6/">December 26th 2018, 2:14:28 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -528,7 +589,7 @@ top:50vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-初始化"><span class="toc-number">1.</span> <span class="toc-text">1. 初始化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-Main函数"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 Main函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-读取配置"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 读取配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-主线程初始化"><span class="toc-number">1.3.</span> <span class="toc-text">1.3 主线程初始化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-启动"><span class="toc-number">2.</span> <span class="toc-text">2. 启动</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-主线程启动"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 主线程启动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-启动Worker线程"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 启动Worker线程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-参考链接"><span class="toc-number">3.</span> <span class="toc-text">3. 参考链接</span></a></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
@@ -541,6 +602,10 @@ top:50vh;
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
     
     
     
@@ -639,7 +704,7 @@ top:50vh;
     
     
         <li class="archive-post-item">
-            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/2018/12/24/envoy-6/" >envoy-6</a>
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/2018/12/24/envoy-6/" >[Envoy学习笔记]（六） Envoy启动流程</a>
         </li>
     
     
@@ -685,6 +750,8 @@ top:50vh;
         <span class="sidebar-tag-name" data-tags="Envoy"><span class="iconfont-archer">&#xe606;</span>Envoy</span>
     
         <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="ServiceMesh"><span class="iconfont-archer">&#xe606;</span>ServiceMesh</span>
     
         <span class="sidebar-tag-name" data-tags="技术博客"><span class="iconfont-archer">&#xe606;</span>技术博客</span>
     
