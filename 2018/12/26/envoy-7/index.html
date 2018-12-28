@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Henry Chan">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Henry Chan">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>[Envoy学习笔记]（七）Listener · Henry&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/saber.jpg" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Henry&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">[Envoy学习笔记]（七）Listener</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Henry's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://source.unsplash.com/random)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            [Envoy学习笔记]（七）Listener
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "ServiceMesh">ServiceMesh</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">3.3k</span>阅读时长: <span class="post-count reading-time">14 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2018/12/26</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <blockquote>
+<p>Listener是Envoy里面最重要的一个模块了，负责监听请求、转发请求等。这篇文章就详细分析一下Listener是个什么东西，怎么实现各种功能的</p>
+</blockquote>
+<h2 id="1-C-网络编程"><a href="#1-C-网络编程" class="headerlink" title="1. C++网络编程"></a>1. C++网络编程</h2><p>现在可以先来回忆一下C++中里面的Socket编程。下面是一个简单的用C++编写的回显服务器实例。客户端中获取用户输入，然后发送到服务器，服务器收到数据后将数据原样返回给客户端，客户端将从网络中收到的数据显示出来<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Echo Server</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;arpa/inet.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;event2/event.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;event2/event_struct.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;event2/bufferevent.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;event2/buffer.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">str_echo</span><span class="params">(<span class="keyword">int</span> sockfd)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> listenfd,connfd;</span><br><span class="line">    <span class="keyword">pid_t</span> childpid;</span><br><span class="line">    <span class="keyword">socklen_t</span> clilen;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">cliaddr</span>,<span class="title">servaddr</span>;</span></span><br><span class="line"></span><br><span class="line">    listenfd = socket(AF_INET,SOCK_STREAM,<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    bzero(&amp;servaddr,<span class="keyword">sizeof</span>(servaddr));</span><br><span class="line">    servaddr.sin_family = AF_INET;</span><br><span class="line">    <span class="comment">// servaddr.sin_addr.s_addr = htonl(INADDR_ANY);</span></span><br><span class="line">    servaddr.sin_port = htons(<span class="number">10002</span>);</span><br><span class="line">    inet_pton(AF_INET,<span class="string">"127.0.0.1"</span>,&amp;servaddr.sin_addr);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(bind(listenfd,(struct sockaddr *)&amp;servaddr, <span class="keyword">sizeof</span>(servaddr)))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"server: socket bind failed\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"server: socket bind succeeded\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(listen(listenfd,<span class="number">2</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"server: socket listen failed\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"server: socket listen succeeded\n"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(;;)</span><br><span class="line">    &#123;</span><br><span class="line">        clilen = <span class="keyword">sizeof</span>(cliaddr);</span><br><span class="line">        connfd = accept(listenfd,(struct sockaddr*)&amp;cliaddr,&amp;clilen);</span><br><span class="line">        <span class="keyword">if</span>((childpid=fork())==<span class="number">0</span>) <span class="comment">// child process</span></span><br><span class="line">        &#123;</span><br><span class="line">            close(listenfd);</span><br><span class="line">            str_echo(connfd);</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// parent closes connected socket</span></span><br><span class="line">        close(connfd);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">str_echo</span><span class="params">(<span class="keyword">int</span> sockfd)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">ssize_t</span> n;</span><br><span class="line">    <span class="keyword">char</span> buf[<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>((n=read(sockfd,buf,<span class="number">1024</span>))&gt;<span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        write(sockfd,buf,n);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到这个程序大致上是这样一个流程：</p>
+<ul>
+<li><strong>socket()</strong> 创建一个新的套接字</li>
+<li><strong>bind()</strong> 将套接字与某个端口绑定</li>
+<li><strong>listen()</strong> 江未连接的套接字转换成一个被动套接字，指示内核应该指向该套接字的连接请求</li>
+<li><strong>accept()</strong> 从连接请求队列中取出一个请求，并接受连接</li>
+<li><strong>read()/write()</strong> 接收和发送数据</li>
+<li><strong>close()</strong> 中断连接</li>
+</ul>
+<p>为什么要说到C++ Socket编程呢？因为Envoy中的Listener最终都是要像这个程序一样创建套接字，绑定端口。不过，Listener是在这个基础上进行了封装，并且引入了Libevent库来进行网络编程。所以接下来就一步步分解Listener的相关实现，直到看到我们熟悉的C++ Socket编程。</p>
+<h2 id="2-Listener分析"><a href="#2-Listener分析" class="headerlink" title="2. Listener分析"></a>2. Listener分析</h2><p>在前一篇博客中，我已经大概分析了Envoy总体上的启动流程，但是在一些细节的地方上是没有说清楚的，接下来我就会深入的分析跟Listener有关的代码。</p>
+<h3 id="2-1-一些关于Listener的说明"><a href="#2-1-一些关于Listener的说明" class="headerlink" title="2.1 一些关于Listener的说明"></a>2.1 一些关于Listener的说明</h3><ul>
+<li>在Envoy的代码中，实现了单个的Listener以及负责管理所有Listener的Listener Manager。这里不会单纯的分析单个Listener也会分析Listener Manager<h3 id="2-2-Listener配置读取"><a href="#2-2-Listener配置读取" class="headerlink" title="2.2 Listener配置读取"></a>2.2 Listener配置读取</h3></li>
+<li>前一篇博客已经说了如何实现从yaml文件读取到proto文件定义的数据结构中了，这里只介绍怎么从proto定义的数据结构中读取数据并用来初始化Listener</li>
+<li><p><strong>server.cc</strong></p>
+<ul>
+<li>InstanceImpl类包含了一个Listener Manager，在主线程初始化的时候先创建了一个Listener Manager类的类对象。然后再通过config_来初始化这个Listener Manager<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> InstanceImpl::initialize(Options&amp; options,</span><br><span class="line">                            Network::Address::InstanceConstSharedPtr local_address,</span><br><span class="line">                            ComponentFactory&amp; component_factory) &#123;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">// 穿件一个新的Listener Manager</span></span><br><span class="line">listener_manager_ = <span class="built_in">std</span>::make_unique&lt;ListenerManagerImpl&gt;(*<span class="keyword">this</span>, listener_component_factory_,</span><br><span class="line">                                                          worker_factory_, time_system_);</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用yaml文件中的配置来初始化Listener Manager</span></span><br><span class="line">config_.initialize(bootstrap_, *<span class="keyword">this</span>, *cluster_manager_factory_);</span><br><span class="line">...</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p><strong>configuration_impl.cc</strong> 查看initialize函数定义可知，Envoy循环读取配置文件中定义的Listener配置，并且调用listenerManager的addOrUpdateListener函数来根据配置创建新的Listener</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> MainImpl::initialize(<span class="keyword">const</span> envoy::config::bootstrap::v2::Bootstrap&amp; bootstrap,</span><br><span class="line">                        Instance&amp; server,</span><br><span class="line">                        Upstream::ClusterManagerFactory&amp; cluster_manager_factory) &#123;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">// 遍历所有的Listener配置，通过Listener Manager来实例化这些Listener</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">auto</span>&amp; listeners = bootstrap.static_resources().listeners();</span><br><span class="line">ENVOY_LOG(info, <span class="string">"loading &#123;&#125; listener(s)"</span>, listeners.size());</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">ssize_t</span> i = <span class="number">0</span>; i &lt; listeners.size(); i++) &#123;</span><br><span class="line">  ENVOY_LOG(debug, <span class="string">"listener #&#123;&#125;:"</span>, i);</span><br><span class="line">  server.listenerManager().addOrUpdateListener(listeners[i], <span class="string">""</span>, <span class="literal">false</span>);</span><br><span class="line">&#125;</span><br><span class="line">  ...</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="2-3-Listener创建"><a href="#2-3-Listener创建" class="headerlink" title="2.3 Listener创建"></a>2.3 Listener创建</h3><ul>
+<li><strong>listener_manager_impl.cc</strong> <ul>
+<li>addOrUpdateListener函数接受一个传进来的函数配置，然后根据这个配置进行真实的Listener实例创建</li>
+<li>由这个函数的名字就可以知道这个函数既可以新建Listener又可以更新原有的Listener。函数前面部分基本就是一些用于更新Listener的操作，这里暂时不看更新Listener，只看新建Listener<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> ListenerManagerImpl::addOrUpdateListener(<span class="keyword">const</span> envoy::api::v2::Listener&amp; config,</span><br><span class="line">                                            <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; version_info, <span class="keyword">bool</span> modifiable) &#123;</span><br><span class="line"><span class="comment">// 判断Listener名字有没有指定</span></span><br><span class="line"><span class="comment">// 如果没有指定则随机生产一个名字</span></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line"><span class="keyword">if</span> (!config.name().empty()) &#123;</span><br><span class="line">  name = config.name();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  name = server_.random().uuid();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这一部分代码就是判断一下是不是重复定义的Listener</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建一个新的Listener</span></span><br><span class="line"><span class="comment">// 这里才是真正的Listener创建，创建Socket和绑定Socket到端口都是在这里完成的</span></span><br><span class="line"><span class="function">ListenerImplPtr <span class="title">new_listener</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    <span class="keyword">new</span> ListenerImpl(config, version_info, *<span class="keyword">this</span>, name, modifiable, workers_started_, hash))</span></span>;</span><br><span class="line">ListenerImpl&amp; new_listener_ref = *new_listener;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这一部分代码主要都是做一些更新Listener的工作 </span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 设置新建listener的Socket</span></span><br><span class="line">  <span class="comment">// 这里还判断了一下新增的listener是不是已存在的drain listener</span></span><br><span class="line">  new_listener-&gt;setSocket(draining_listener_socket</span><br><span class="line">                              ? draining_listener_socket</span><br><span class="line">                              : factory_.createListenSocket(new_listener-&gt;address(),</span><br><span class="line">                                                            new_listener-&gt;listenSocketOptions(),</span><br><span class="line">                                                            new_listener-&gt;bindToPort()));</span><br><span class="line"> ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<p>在这里也看不到熟悉的Socket编程的身影，继续看下去，回到刚刚创建new_listener对象的地方</p>
+<ul>
+<li><p><strong>listener_manager_impl.cc</strong> </p>
+  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ListenerImplPtr <span class="title">new_listener</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params"><span class="keyword">new</span> ListenerImpl(config, version_info, *<span class="keyword">this</span>, name, modifiable, workers_started_, hash))</span></span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>查看ListenImpl类的定义，可以看到ListenImpl类包含了一个Network::Address类型的对象address_。这个对象在new_listener被构建时，使用config.address的值初始化。通过查看envoy的api文档可知，envoy配置中的address就包含了socket_address，所以Socket的创建、端口的绑定应该就是在这里完成的。我们可以接着看下去。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ListenerImpl::ListenerImpl(<span class="keyword">const</span> envoy::api::v2::Listener&amp; config, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; version_info,</span><br><span class="line">                         ListenerManagerImpl&amp; parent, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; name, <span class="keyword">bool</span> modifiable,</span><br><span class="line">                         <span class="keyword">bool</span> workers_started, <span class="keyword">uint64_t</span> hash)</span><br><span class="line">  : parent_(parent), address_(Network::Address::resolveProtoAddress(config.address())),</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+<p>可以看到address_是用Network::Address::resolveProtoAddress(config.address())的返回值来进行初始化的。这个函数是设置了Envoy的地址解析器，写过Envoy配置的话，就可以知道有时候listener的监听地址可以不写具体的ip而用主机名来代替。这个就是用于将主机名解析为具体的ip地址所设置的。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>resolver_impl.cc</strong>  查看resolveProtoAddress函数可知，如果没有配置了解析器名称的话，那么就会调用resolve函数生成一个指向Address类的指针。而resolve函数只是判断了一下配置的端口类型，实际上指向Network::Address类的指针是通过parseInternetAddress函数来实现的</p>
+</li>
+<li><strong>ultility.cc</strong> 在parseInternetAddress函数中我们终于可以看到熟悉的Socket编程相关的东西了。在这里声明了一个sockaddr_in的变量，并根据配置文件中设定的值来设定这个变量。然后判断一下是ipv4还是ipv6，构建对应的指针并返回。接下来我们假定设定listener用的都是ipv4地址</li>
+<li><strong>address_impl.cc</strong> 在parseInternetAddress中，调用的是explicit Ipv4Instance(const sockaddr_in* address)这个构造函数来创建指针。在这个构造函数中实际上就是用address这个变量来简单的初始化一下Ipv4Instance类中的各个类成员。还没有进行什么Socket创建和绑定之类的东西。</li>
+</ul>
+<p>那Socket创建和绑定又是在哪里实现的那，继续往下看。</p>
+<ul>
+<li><p>listener_manager_impl.cc** 在回到这个源文件，找到这一行</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">new_listener-&gt;setSocket(draining_listener_socket</span><br><span class="line">                              ? draining_listener_socket</span><br><span class="line">                              : factory_.createListenSocket(new_listener-&gt;address(),</span><br><span class="line">                                                            new_listener-&gt;listenSocketOptions(),</span><br><span class="line">                                                            new_listener-&gt;bindToPort()));</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这里调用了new_listener的setSocket函数来进一步设置Socket</li>
+<li>setSocket函数中接受一个传进来的Socket指针，将这个指针设置为Listener包含的socket，再调用applyOptions来进一步设置这个Socket。applyOption中设置了Socket的状态为STATE_BOUND，应该是表明该Socket已经与端口绑定</li>
+<li>factory_是一个ListenerComponentFactory类对象，这个类在当前源文件中被定义</li>
+<li>createListenSocket函数中最后是返回一个NetworkListenSocket类的智能指针。在这个NetworkListenSocket对象被创建的时候，Socket也会被创建</li>
+</ul>
+</li>
+<li><strong>listen_socket_impl.cc</strong> <ul>
+<li>NetWorkListenSocket类继承了ListenSocketImpl类，在调用NetworkListenSocket的构造函数时，会通过初始化列表调用ListenSocketImplement的构造函数。而传入ListenSocketImplement函数的是address-&gt;socket(T::type)的返回值，而address-&gt;socket函数负责创建了socket</li>
+<li>接下来调用的setupSocket函数实现了对socket与端口的封装</li>
+</ul>
+</li>
+<li><strong>address_impl.cc</strong> <ul>
+<li>socket函数中单纯就是调用了socketFromSocketType函数</li>
+<li>socketFromSocketType函数根据地址配置创建了Socket。调用的是全局的socket函数(::Socket(domain,flags,0)，单独的域作用符表明使用的是全局的函数)，即我们熟悉的Socket编程中的函数</li>
+</ul>
+</li>
+</ul>
+<p>熟悉的Socket创建跟绑定已经找到了，那么Listener是怎么样接收连接的，即listen()和accept()函数在哪？这里需要注意的是，Envoy是使用了Libevent网络库，这个库是对C++原始的Socket的简单封装，并且是使用事件响应机制的。所以接下来的监听和建立连接跟普通的Socket不大一样。其次，Envoy是使用了一个线程池的实现，每个连接都交给一个单独的线程去负责。所以这里创建了Listener之后并不会立刻将Listener启动，而是先会将Listener与线程绑定起来之后再启动的。因此，先让我们看一下怎么绑定Listener和worker</p>
+<h3 id="2-4-Listener与Worker绑定"><a href="#2-4-Listener与Worker绑定" class="headerlink" title="2.4 Listener与Worker绑定"></a>2.4 Listener与Worker绑定</h3><ul>
+<li><strong>server.cc</strong> <ul>
+<li>run函数中声明了一个RunHelper类对象，并且给RunHelper的构造函数传入了一个lambda函数。这个lambda函数单纯调用了startWorkers。而在RunHelper类的构造函数中，这个lambda函数被调用</li>
+<li>而在InstanceImpl的startWorkers函数中则是直接调用了Listener Manager的startWorkers函数。</li>
+</ul>
+</li>
+<li><p><strong>listen_manager_impl.cc</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> ListenerManagerImpl::startWorkers(GuardDog&amp; guard_dog) &#123;</span><br><span class="line">  ENVOY_LOG(info, <span class="string">"all dependencies initialized. starting workers"</span>);</span><br><span class="line">  ASSERT(!workers_started_);</span><br><span class="line">  workers_started_ = <span class="literal">true</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; worker : workers_) &#123;</span><br><span class="line">    ASSERT(warming_listeners_.empty());</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; listener : active_listeners_) &#123;</span><br><span class="line">      addListenerToWorker(*worker, *listener);</span><br><span class="line">    &#125;</span><br><span class="line">    worker-&gt;start(guard_dog);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>startWorkers函数将每个worker都与所有的listener绑定</li>
+<li>绑定之后启动线程</li>
+<li>必须注意一个线程负责一个连接而不是负责一个listener</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">void</span> ListenerManagerImpl::addListenerToWorker(Worker&amp; worker, ListenerImpl&amp; listener) &#123;</span><br><span class="line">  worker.addListener(listener, [<span class="keyword">this</span>, &amp;listener](<span class="keyword">bool</span> success) -&gt; <span class="keyword">void</span> &#123;</span><br><span class="line">    server_.dispatcher().post([<span class="keyword">this</span>, success, &amp;listener]() -&gt; <span class="keyword">void</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (!success &amp;&amp; !listener.onListenerCreateFailure()) &#123;</span><br><span class="line">        ENVOY_LOG(critical, <span class="string">"listener '&#123;&#125;' failed to listen on address '&#123;&#125;' on worker"</span>,</span><br><span class="line">                  listener.name(), listener.socket().localAddress()-&gt;asString());</span><br><span class="line">        stats_.listener_create_failure_.inc();</span><br><span class="line">        removeListener(listener.name());</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (success) &#123;</span><br><span class="line">        stats_.listener_create_success_.inc();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这一个函数感觉是有点骚的，lambda函数套lambda函数。大概理一下就是在调用worker.addListener函数时传入了一个lambda1函数。然后这这个lambda1函数里面又调用了server_.dispatcher().post()函数，并给这个post函数传入了参数lambda2函数。这里又涉及了Envoy的另外一个很重要的机制——Eventloop，这个之后再研究。</li>
+</ul>
+</li>
+<li><p><strong>worker_impl.cc</strong> </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">void</span> WorkerImpl::addListener(Network::ListenerConfig&amp; listener, AddListenerCompletion completion) &#123;</span><br><span class="line">  <span class="comment">// All listener additions happen via post. However, we must deal with the case where the listener</span></span><br><span class="line">  <span class="comment">// can not be created on the worker. There is a race condition where 2 processes can successfully</span></span><br><span class="line">  <span class="comment">// bind to an address, but then fail to listen() with EADDRINUSE. During initial startup, we want</span></span><br><span class="line">  <span class="comment">// to surface this.</span></span><br><span class="line">  dispatcher_-&gt;post([<span class="keyword">this</span>, &amp;listener, completion]() -&gt; <span class="keyword">void</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      handler_-&gt;addListener(listener);</span><br><span class="line">      hooks_.onWorkerListenerAdded();</span><br><span class="line">      completion(<span class="literal">true</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (<span class="keyword">const</span> Network::CreateListenerException&amp; e) &#123;</span><br><span class="line">      completion(<span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>这里实际上又是将工作交给eventloop去完成，传入了一个新的lambda函数，由eventloop机制在恰当的时候调用这个函数。</li>
+<li>在这个lambda函数里面又调用了handler_.addListener来完成listener的绑定</li>
+</ul>
+</li>
+<li><strong>connection_handler_impl.cc</strong> <ul>
+<li>addlistener函数接受到传入来的将要与worker绑定的listener之后，就用这个listener来初始化一个ActiveListener类对象</li>
+<li>ActiveListener的构造函数，调用了一个createListener来新建一个Listener，createListener其实也没有做什么很复杂的操作，单纯就是new一个新的ListenerImpl对象。但是在此前的分析中我并没有提到的就是其实Listener构造函数中也包含了libevent事件的注册</li>
+</ul>
+</li>
+<li><p><strong>listener_impl.cc</strong> </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ListenerImpl::ListenerImpl(Event::DispatcherImpl&amp; dispatcher, Socket&amp; socket, ListenerCallbacks&amp; cb,</span><br><span class="line">                         <span class="keyword">bool</span> bind_to_port, <span class="keyword">bool</span> hand_off_restored_destination_connections)</span><br><span class="line">  : local_address_(<span class="literal">nullptr</span>), cb_(cb),</span><br><span class="line">    hand_off_restored_destination_connections_(hand_off_restored_destination_connections),</span><br><span class="line">    listener_(<span class="literal">nullptr</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">        evconnlistener_new(&amp;dispatcher.base(), listenCallback, <span class="keyword">this</span>, <span class="number">0</span>, <span class="number">-1</span>, socket.fd()));</span><br><span class="line"></span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>这里就创建了一个libevent库实现的监听器，当有新连接到达的时候就会调用listenCallback这个回调函数了</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">void</span> ListenerImpl::listenCallback(evconnlistener*, <span class="keyword">evutil_socket_t</span> fd, sockaddr* remote_addr,</span><br><span class="line">                                  <span class="keyword">int</span> remote_addr_len, <span class="keyword">void</span>* arg) &#123;</span><br><span class="line">  ListenerImpl* listener = <span class="keyword">static_cast</span>&lt;ListenerImpl*&gt;(arg);</span><br><span class="line">    ...</span><br><span class="line">  listener-&gt;cb_.onAccept(<span class="built_in">std</span>::make_unique&lt;AcceptedSocketImpl&gt;(fd, local_address, remote_address),</span><br><span class="line">                         listener-&gt;hand_off_restored_destination_connections_);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>当新连接来到的时候，listenCallback被调用，然后再调用ActiveListener的onAccept函数。并且listenCallback被调用的时候libevent实际上已经帮我们accept了这个客户端</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">void</span> ConnectionHandlerImpl::ActiveListener::onAccept(</span><br><span class="line">    Network::ConnectionSocketPtr&amp;&amp; socket, <span class="keyword">bool</span> hand_off_restored_destination_connections) &#123;</span><br><span class="line">  <span class="keyword">auto</span> active_socket = <span class="built_in">std</span>::make_unique&lt;ActiveSocket&gt;(*<span class="keyword">this</span>, <span class="built_in">std</span>::move(socket),</span><br><span class="line">                                                      hand_off_restored_destination_connections);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Create and run the filters</span></span><br><span class="line">  config_.filterChainFactory().createListenerFilterChain(*active_socket);</span><br><span class="line">  active_socket-&gt;continueFilterChain(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Move active_socket to the sockets_ list if filter iteration needs to continue later.</span></span><br><span class="line">  <span class="comment">// Otherwise we let active_socket be destructed when it goes out of scope.</span></span><br><span class="line">  <span class="keyword">if</span> (active_socket-&gt;iter_ != active_socket-&gt;accept_filters_.end()) &#123;</span><br><span class="line">    active_socket-&gt;startTimer();</span><br><span class="line">    active_socket-&gt;moveIntoListBack(<span class="built_in">std</span>::move(active_socket), sockets_);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>这里还生成一些listener中的filter，以后再详细谈怎么生成filter</p>
+</li>
+<li>在continueFilterChain函数里面调用了newConnection来创建监听器上的一个新连接</li>
+<li>在newConnection里面利用libevent来对连接的读写事件进行监听<br>到此，listener就已经完全准备好了<h2 id="3-Listener类图"><a href="#3-Listener类图" class="headerlink" title="3. Listener类图"></a>3. Listener类图</h2></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>后记</strong> 絮絮叨叨写了一大堆，之后等我对Envoy的理解加深之后我会回来修改这篇博客的，尽量做到言简意赅。但不得不说通过写出来的方法来理清代码对于我这种渣来说真是一个好方法。Listener类图之后再补</p>
+</blockquote>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://czxhenry.github.io">Henry Chan</a>
+            <p>原文链接：<a href="http://czxhenry.github.io/2018/12/26/envoy-7/">http://czxhenry.github.io/2018/12/26/envoy-7/</a>
+            <p>发表日期：<a href="http://czxhenry.github.io/2018/12/26/envoy-7/">December 26th 2018, 2:26:58 pm</a>
+            <p>更新日期：<a href="http://czxhenry.github.io/2018/12/26/envoy-7/">December 28th 2018, 8:47:58 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/12/24/envoy-6/" title= "[Envoy学习笔记]（六） Envoy启动流程">
+                    <div class="prevTitle">[Envoy学习笔记]（六） Envoy启动流程</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:812582916@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/CZXHenry" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-C-网络编程"><span class="toc-number">1.</span> <span class="toc-text">1. C++网络编程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Listener分析"><span class="toc-number">2.</span> <span class="toc-text">2. Listener分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-一些关于Listener的说明"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 一些关于Listener的说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Listener配置读取"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 Listener配置读取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Listener创建"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 Listener创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Listener与Worker绑定"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 Listener与Worker绑定</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Listener类图"><span class="toc-number">3.</span> <span class="toc-text">3. Listener类图</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 9
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/26</span><a class="archive-post-title" href= "/2018/12/26/envoy-7/" >[Envoy学习笔记]（七）Listener</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/2018/12/24/envoy-6/" >[Envoy学习笔记]（六） Envoy启动流程</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span><a class="archive-post-title" href= "/2018/12/13/envoy-5/" >[Envoy学习笔记]（五） Envoy项目概述</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/2018/12/10/envoy-4/" >[Envoy学习笔记]（四） 手动编译运行Envoy</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span><a class="archive-post-title" href= "/2018/12/03/envoy-3/" >[Envoy学习笔记]（三）使用Envoy</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/29</span><a class="archive-post-title" href= "/2018/11/29/envoy-2/" >[Envoy学习笔记]（二） 搭建Envoy官方Demo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/29</span><a class="archive-post-title" href= "/2018/11/29/Envoy学习笔记-Envoy是什么/" >[Envoy学习笔记]（一） Envoy是什么</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/14</span><a class="archive-post-title" href= "/2018/10/14/如何利用Hexo搭建博客/" >如何利用Hexo搭建博客</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/13</span><a class="archive-post-title" href= "/2018/10/13/hello-world/" >Hello World</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="Envoy"><span class="iconfont-archer">&#xe606;</span>Envoy</span>
+    
+        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="ServiceMesh"><span class="iconfont-archer">&#xe606;</span>ServiceMesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="技术博客"><span class="iconfont-archer">&#xe606;</span>技术博客</span>
+    
+        <span class="sidebar-tag-name" data-tags="Hexo"><span class="iconfont-archer">&#xe606;</span>Hexo</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="各种教程"><span class="iconfont-archer">&#xe60a;</span>各种教程</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Henry Chan"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+</body>
+</html>
+
+
