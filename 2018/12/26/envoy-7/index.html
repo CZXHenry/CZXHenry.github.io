@@ -274,7 +274,7 @@ height:50vh;
                 
                 
                     <div class="post-intro-read">
-                        <span>字数统计: <span class="post-count word-count">3.3k</span>阅读时长: <span class="post-count reading-time">14 min</span></span>
+                        <span>字数统计: <span class="post-count word-count">3.4k</span>阅读时长: <span class="post-count reading-time">14 min</span></span>
                     </div>
                 
                 <div class="post-intro-meta">
@@ -520,13 +520,17 @@ height:50vh;
 <li><p>这里还生成一些listener中的filter，以后再详细谈怎么生成filter</p>
 </li>
 <li>在continueFilterChain函数里面调用了newConnection来创建监听器上的一个新连接</li>
-<li>在newConnection里面利用libevent来对连接的读写事件进行监听<br>到此，listener就已经完全准备好了<h2 id="3-Listener类图"><a href="#3-Listener类图" class="headerlink" title="3. Listener类图"></a>3. Listener类图</h2></li>
+<li>在newConnection里面利用libevent来对连接的读写事件进行监听<br>到此，listener就已经完全准备好了</li>
 </ul>
 </li>
 </ul>
-<blockquote>
+<h2 id="3-Listener类图"><a href="#3-Listener类图" class="headerlink" title="3. Listener类图"></a>3. Listener类图</h2><p><img src="/2018/12/26/envoy-7/1.png" alt=""></p>
+<h2 id="4-一些注意事项跟可能存在错误的地方"><a href="#4-一些注意事项跟可能存在错误的地方" class="headerlink" title="4. 一些注意事项跟可能存在错误的地方"></a>4. 一些注意事项跟可能存在错误的地方</h2><ul>
+<li>在画类图时发现ListenerImpl有两处定义，一处在Server命名空间中定义，另一处在Network命名空间中定义。貌似在构造ActiveListener的时候就等于把Server::ListenerImpl转换成Network::ListenerImpl<blockquote>
 <p><strong>后记</strong> 絮絮叨叨写了一大堆，之后等我对Envoy的理解加深之后我会回来修改这篇博客的，尽量做到言简意赅。但不得不说通过写出来的方法来理清代码对于我这种渣来说真是一个好方法。Listener类图之后再补</p>
 </blockquote>
+</li>
+</ul>
 
     </article>
     <!-- license  -->
@@ -535,7 +539,7 @@ height:50vh;
             <p>原文作者：<a href="http://czxhenry.github.io">Henry Chan</a>
             <p>原文链接：<a href="http://czxhenry.github.io/2018/12/26/envoy-7/">http://czxhenry.github.io/2018/12/26/envoy-7/</a>
             <p>发表日期：<a href="http://czxhenry.github.io/2018/12/26/envoy-7/">December 26th 2018, 2:26:58 pm</a>
-            <p>更新日期：<a href="http://czxhenry.github.io/2018/12/26/envoy-7/">December 28th 2018, 8:47:58 pm</a>
+            <p>更新日期：<a href="http://czxhenry.github.io/2018/12/26/envoy-7/">December 28th 2018, 10:04:14 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -660,7 +664,7 @@ top:50vh;
         <div class="toc-catalog">
             <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
         </div>
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-C-网络编程"><span class="toc-number">1.</span> <span class="toc-text">1. C++网络编程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Listener分析"><span class="toc-number">2.</span> <span class="toc-text">2. Listener分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-一些关于Listener的说明"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 一些关于Listener的说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Listener配置读取"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 Listener配置读取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Listener创建"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 Listener创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Listener与Worker绑定"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 Listener与Worker绑定</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Listener类图"><span class="toc-number">3.</span> <span class="toc-text">3. Listener类图</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-C-网络编程"><span class="toc-number">1.</span> <span class="toc-text">1. C++网络编程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Listener分析"><span class="toc-number">2.</span> <span class="toc-text">2. Listener分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-一些关于Listener的说明"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 一些关于Listener的说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Listener配置读取"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 Listener配置读取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Listener创建"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 Listener创建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Listener与Worker绑定"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 Listener与Worker绑定</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Listener类图"><span class="toc-number">3.</span> <span class="toc-text">3. Listener类图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-一些注意事项跟可能存在错误的地方"><span class="toc-number">4.</span> <span class="toc-text">4. 一些注意事项跟可能存在错误的地方</span></a></li></ol>
     </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
@@ -673,8 +677,6 @@ top:50vh;
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
-    
-    
     
     
     
