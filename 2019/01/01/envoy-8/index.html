@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" >
+    <meta name="author" content="Henry Chan">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Henry Chan">
+    
+    <meta name="keywords" content="hexo,hexo-theme,hexo-blog">
+    
+    <meta name="description" content="">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>[Envoy学习笔记]（八）建立连接、处理数据和转发流量 · Henry&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href= "/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="stylesheet" href= "/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href= "/assets/saber.jpg" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script" />
+    <link rel="preload" href="/scripts/main.js" as="script" />
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Henry&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">[Envoy学习笔记]（八）建立连接、处理数据和转发流量</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Henry's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(https://source.unsplash.com/random)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            [Envoy学习笔记]（八）建立连接、处理数据和转发流量
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "ServiceMesh">ServiceMesh</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">2.4k</span>阅读时长: <span class="post-count reading-time">10 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/01/01</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <blockquote>
+<p>浪了两三天，终于又下定决心开始写Envoy分析博客了。写这些博客的很重要的一个原因就是希望能够帮助我自己更加理解Envoy的各种机制，所以难点不在于把博客写出来而是怎么去理解这些东西。看Envoy的源码是我第一次看源码，所以非常的头大，逃避心理也很严重，但是我应该可以坚持下去的，毕竟这是毕设hhhh</p>
+</blockquote>
+<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><ul>
+<li>前一篇博客主要是关于Listener的总结。而这一篇主要就是基于参考链接中的两篇博客，对Envoy处理Http请求的进一步解析。其实这个Http请求到响应的全链路主要是可以分成三大部分的，分别是建立连接、处理数据和转发流量。接下来就会分别对这三个部分的代码进行分析总结。<h2 id="2-建立连接"><a href="#2-建立连接" class="headerlink" title="2. 建立连接"></a>2. 建立连接</h2></li>
+<li>前面已经说过怎么注册事件，使Socket监听连接请求，当新的连接请求到来时，会自动调用已经注册好的回调函数。</li>
+<li><p><strong>connection_handler_impl.cc</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">void</span> ConnectionHandlerImpl::ActiveSocket::continueFilterChain(<span class="keyword">bool</span> success) &#123;</span><br><span class="line">  <span class="keyword">if</span> (success) &#123;</span><br><span class="line">    <span class="keyword">if</span> (iter_ == accept_filters_.end()) &#123;</span><br><span class="line">      iter_ = accept_filters_.begin();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      iter_ = <span class="built_in">std</span>::next(iter_);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (; iter_ != accept_filters_.end(); iter_++) &#123;</span><br><span class="line">      Network::FilterStatus status = (*iter_)-&gt;onAccept(*<span class="keyword">this</span>);</span><br><span class="line">      <span class="keyword">if</span> (status == Network::FilterStatus::StopIteration) &#123;</span><br><span class="line">        <span class="comment">// The filter is responsible for calling us again at a later time to continue the filter</span></span><br><span class="line">        <span class="comment">// chain from the next filter.</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Successfully ran all the accept filters.</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Check if the socket may need to be redirected to another listener.</span></span><br><span class="line">    ActiveListener* new_listener = <span class="literal">nullptr</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (hand_off_restored_destination_connections_ &amp;&amp; socket_-&gt;localAddressRestored()) &#123;</span><br><span class="line">      <span class="comment">// Find a listener associated with the original destination address.</span></span><br><span class="line">      new_listener = listener_.parent_.findActiveListenerByAddress(*socket_-&gt;localAddress());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (new_listener != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">      <span class="comment">// Hands off connections redirected by iptables to the listener associated with the</span></span><br><span class="line">      <span class="comment">// original destination address. Pass 'hand_off_restored_destionations' as false to</span></span><br><span class="line">      <span class="comment">// prevent further redirection.</span></span><br><span class="line">      new_listener-&gt;onAccept(<span class="built_in">std</span>::move(socket_), <span class="literal">false</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">// Set default transport protocol if none of the listener filters did it.</span></span><br><span class="line">      <span class="keyword">if</span> (socket_-&gt;detectedTransportProtocol().empty()) &#123;</span><br><span class="line">        socket_-&gt;setDetectedTransportProtocol(</span><br><span class="line">            Extensions::TransportSockets::TransportSocketNames::get().RawBuffer);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">// Create a new connection on this listener.</span></span><br><span class="line">      <span class="comment">// 创建一个新的连接</span></span><br><span class="line">      listener_.newConnection(<span class="built_in">std</span>::move(socket_));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">void</span> ConnectionHandlerImpl::ActiveListener::onAccept(</span><br><span class="line">    Network::ConnectionSocketPtr&amp;&amp; socket, <span class="keyword">bool</span> hand_off_restored_destination_connections) &#123;</span><br><span class="line">  <span class="keyword">auto</span> active_socket = <span class="built_in">std</span>::make_unique&lt;ActiveSocket&gt;(*<span class="keyword">this</span>, <span class="built_in">std</span>::move(socket),</span><br><span class="line">                                                      hand_off_restored_destination_connections);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Create and run the filters</span></span><br><span class="line">  config_.filterChainFactory().createListenerFilterChain(*active_socket);</span><br><span class="line">  active_socket-&gt;continueFilterChain(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Move active_socket to the sockets_ list if filter iteration needs to continue later.</span></span><br><span class="line">  <span class="comment">// Otherwise we let active_socket be destructed when it goes out of scope.</span></span><br><span class="line">  <span class="keyword">if</span> (active_socket-&gt;iter_ != active_socket-&gt;accept_filters_.end()) &#123;</span><br><span class="line">    active_socket-&gt;startTimer();</span><br><span class="line">    active_socket-&gt;moveIntoListBack(<span class="built_in">std</span>::move(active_socket), sockets_);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>当连接请求到来时被调用的函数就是OnAccept函数,这里会创建一系列的Filter并且运行</li>
+<li>continueFilterChain函数中运行全部的Filter，并且会创建ConnectionImpl类对象，这个类是对连接的一个抽象，连接创建之后的各种事件注册都是由这个对象负责的。</li>
+<li>newConnection函数中创建了一个ConnectionImpl类对象</li>
+</ul>
+</li>
+<li><p><strong>connection_impl.cc</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">  ConnectionImpl::ConnectionImpl(Event::Dispatcher&amp; dispatcher, ConnectionSocketPtr&amp;&amp; socket,</span><br><span class="line">                               TransportSocketPtr&amp;&amp; transport_socket, <span class="keyword">bool</span> connected)</span><br><span class="line">    : transport_socket_(<span class="built_in">std</span>::move(transport_socket)), socket_(<span class="built_in">std</span>::move(socket)),</span><br><span class="line">      filter_manager_(*<span class="keyword">this</span>, *<span class="keyword">this</span>), stream_info_(dispatcher.timeSystem()),</span><br><span class="line">      write_buffer_(</span><br><span class="line">          dispatcher.getWatermarkFactory().create([<span class="keyword">this</span>]() -&gt; <span class="keyword">void</span> &#123; <span class="keyword">this</span>-&gt;onLowWatermark(); &#125;,</span><br><span class="line">                                                  [<span class="keyword">this</span>]() -&gt; <span class="keyword">void</span> &#123; <span class="keyword">this</span>-&gt;onHighWatermark(); &#125;)),</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// We never ask for both early close and read at the same time. If we are reading, we want to</span></span><br><span class="line">  <span class="comment">// consume all available data.</span></span><br><span class="line">  <span class="comment">// 注册文件读写事件，回调函数实际上就是onFileEvent函数</span></span><br><span class="line">  file_event_ = dispatcher_.createFileEvent(</span><br><span class="line">      fd(), [<span class="keyword">this</span>](<span class="keyword">uint32_t</span> events) -&gt; <span class="keyword">void</span> &#123; onFileEvent(events); &#125;, Event::FileTriggerType::Edge,</span><br><span class="line">      Event::FileReadyType::Read | Event::FileReadyType::Write);</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>ConnectionImpl的类构造函数会注册文件读写事件，当事件到来的时候就调用onFileEvent</li>
+<li>在OnFileEvent函数中会判断具体是什么事件触发的这个函数，然后根据不同事件调用不同的函数。比如读事件就调用onReadReady函数，写事件就调用onWriteReady函数</li>
+<li>在onReadReady函数中，调用doRead函数进行真正的数据读取，将数据读取到Connection的read_buffer_中。读取完之后再根据读取的结果做进一步的操作。当确定读取到有数据时，则会继续调用onRead对数据作进一步处理；如果连接已经被客户关闭且没有多余的数据要处理则关闭Socket</li>
+<li>onWriteReady函数也跟onReadReady函数差不多，都是调用了另外一个doWrite函数去完成真实的写操作。然后再根据写入的结果来确定下一步的操作<br>到此一个连接已经完全建立了，注册了读写函数，会在接收到读写事件之后自动调用各种处理流程，下一步就如何处理接收到的流量了<h2 id="3-处理流量"><a href="#3-处理流量" class="headerlink" title="3. 处理流量"></a>3. 处理流量</h2></li>
+</ul>
+</li>
+<li>Envoy包含了很多的对流量的处理，比如限流、熔断等。在这里就是对流量进行各种的处理，处理之后再将数据转发到上游的机器中去</li>
+<li><p><strong>connection_impl.cc</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">void</span> ConnectionImpl::onRead(<span class="keyword">uint64_t</span> read_buffer_size) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!read_enabled_) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (read_buffer_size == <span class="number">0</span> &amp;&amp; !read_end_stream_) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (read_end_stream_) &#123;</span><br><span class="line">    <span class="comment">// read() on a raw socket will repeatedly return 0 (EOF) once EOF has</span></span><br><span class="line">    <span class="comment">// occurred, so filter out the repeats so that filters don't have</span></span><br><span class="line">    <span class="comment">// to handle repeats.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// I don't know of any cases where this actually happens (we should stop</span></span><br><span class="line">    <span class="comment">// reading the socket after EOF), but this check guards against any bugs</span></span><br><span class="line">    <span class="comment">// in ConnectionImpl or strangeness in the OS events (epoll, kqueue, etc)</span></span><br><span class="line">    <span class="comment">// and maintains the guarantee for filters.</span></span><br><span class="line">    <span class="keyword">if</span> (read_end_stream_raised_) &#123;</span><br><span class="line">      <span class="comment">// No further data can be delivered after end_stream</span></span><br><span class="line">      ASSERT(read_buffer_size == <span class="number">0</span>);</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    read_end_stream_raised_ = <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  filter_manager_.onRead();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>onRead函数大部分就是判断是否有读到了数据之类的，真正的对数据处理又是调用了filter_manager_.onRead()</li>
+</ul>
+</li>
+<li><p><strong>filter_manager_impl.cc</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">void</span> FilterManagerImpl::onContinueReading(ActiveReadFilter* filter) &#123;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">list</span>&lt;ActiveReadFilterPtr&gt;::iterator entry;</span><br><span class="line">  <span class="comment">// 如果传入的filter为空，表明从最开始的filter开始进行遍历</span></span><br><span class="line">  <span class="keyword">if</span> (!filter) &#123;</span><br><span class="line">    entry = upstream_filters_.begin();</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    entry = <span class="built_in">std</span>::next(filter-&gt;entry());</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (; entry != upstream_filters_.end(); entry++) &#123;</span><br><span class="line">    <span class="comment">// 检测filter是不是在该链接中第一次被用到</span></span><br><span class="line">    <span class="comment">// 如果是第一次被用到则需要调用onNewConnection来初试化</span></span><br><span class="line">    <span class="keyword">if</span> (!(*entry)-&gt;initialized_) &#123;</span><br><span class="line">      (*entry)-&gt;initialized_ = <span class="literal">true</span>;</span><br><span class="line">      <span class="comment">// 第一次访问则调用onNewConnection</span></span><br><span class="line">      FilterStatus status = (*entry)-&gt;filter_-&gt;onNewConnection();</span><br><span class="line">      <span class="keyword">if</span> (status == FilterStatus::StopIteration) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这里才是filter真正发挥作用的地方</span></span><br><span class="line">    BufferSource::StreamBuffer read_buffer = buffer_source_.getReadBuffer();</span><br><span class="line">    <span class="keyword">if</span> (read_buffer.buffer.length() &gt; <span class="number">0</span> || read_buffer.end_stream) &#123;</span><br><span class="line">      <span class="comment">// 后续调用onData</span></span><br><span class="line">      FilterStatus status = (*entry)-&gt;filter_-&gt;onData(read_buffer.buffer, read_buffer.end_stream);</span><br><span class="line">      <span class="keyword">if</span> (status == FilterStatus::StopIteration) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> FilterManagerImpl::onRead() &#123;</span><br><span class="line">  ASSERT(!upstream_filters_.empty());</span><br><span class="line">  onContinueReading(<span class="literal">nullptr</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>因为每个Listener可以配置一系列的Filter，即Filter Chain。我认为这个onContinueFilterChain函数是被设定为可以从Filter Chain中某一个Filter开始读取的。如果传入onContinueFilterChain的参数为nullptr则表明从Filter Chain的第一个filter开始</li>
+<li>Envoy只定义了几个可用的Filter，下面就以最常用的envoy.http_connection_manager为例进行分析。这个filter的实现就是ConnectionManagerImpl</li>
+</ul>
+</li>
+<li><p><strong>conn_manager_impl.h</strong></p>
+<ul>
+<li><p>ConnectionManagerImpl类继承了ReadFilter，实现了onData中的具体工作</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">  Network::FilterStatus ConnectionManagerImpl::onData(Buffer::Instance&amp; data, <span class="keyword">bool</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!codec_) &#123;</span><br><span class="line">    codec_ = config_.createCodec(read_callbacks_-&gt;connection(), data, *<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">if</span> (codec_-&gt;protocol() == Protocol::Http2) &#123;</span><br><span class="line">      stats_.named_.downstream_cx_http2_total_.inc();</span><br><span class="line">      stats_.named_.downstream_cx_http2_active_.inc();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      stats_.named_.downstream_cx_http1_total_.inc();</span><br><span class="line">      stats_.named_.downstream_cx_http1_active_.inc();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">bool</span> redispatch;</span><br><span class="line">  <span class="keyword">do</span> &#123;</span><br><span class="line">    redispatch = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      codec_-&gt;dispatch(data);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (<span class="keyword">const</span> CodecProtocolException&amp; e) &#123;</span><br><span class="line">      <span class="comment">// HTTP/1.1 codec has already sent a 400 response if possible. HTTP/2 codec has already sent</span></span><br><span class="line">      <span class="comment">// GOAWAY.</span></span><br><span class="line">      ENVOY_CONN_LOG(debug, <span class="string">"dispatch error: &#123;&#125;"</span>, read_callbacks_-&gt;connection(), e.what());</span><br><span class="line">      stats_.named_.downstream_cx_protocol_error_.inc();</span><br><span class="line"></span><br><span class="line">      <span class="comment">// In the protocol error case, we need to reset all streams now. Since we do a flush write and</span></span><br><span class="line">      <span class="comment">// delayed close, the connection might stick around long enough for a pending stream to come</span></span><br><span class="line">      <span class="comment">// back and try to encode.</span></span><br><span class="line">      resetAllStreams();</span><br><span class="line"></span><br><span class="line">      read_callbacks_-&gt;connection().close(Network::ConnectionCloseType::FlushWriteAndDelay);</span><br><span class="line">      <span class="keyword">return</span> Network::FilterStatus::StopIteration;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Processing incoming data may release outbound data so check for closure here as well.</span></span><br><span class="line">    checkForDeferredClose();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// The HTTP/1 codec will pause dispatch after a single message is complete. We want to</span></span><br><span class="line">    <span class="comment">// either redispatch if there are no streams and we have more data. If we have a single</span></span><br><span class="line">    <span class="comment">// complete non-WebSocket stream but have not responded yet we will pause socket reads</span></span><br><span class="line">    <span class="comment">// to apply back pressure.</span></span><br><span class="line">    <span class="keyword">if</span> (codec_-&gt;protocol() != Protocol::Http2) &#123;</span><br><span class="line">      <span class="keyword">if</span> (read_callbacks_-&gt;connection().state() == Network::Connection::State::Open &amp;&amp;</span><br><span class="line">          data.length() &gt; <span class="number">0</span> &amp;&amp; streams_.empty()) &#123;</span><br><span class="line">        redispatch = <span class="literal">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (!streams_.empty() &amp;&amp; streams_.front()-&gt;state_.remote_complete_) &#123;</span><br><span class="line">        read_callbacks_-&gt;connection().readDisable(<span class="literal">true</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="keyword">while</span> (redispatch);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 这里有点疑问，为什么不返回FilterStatus::StopIteration</span></span><br><span class="line">  <span class="comment">// 这样是不是就表明HTTPConnectionFilter只能放在FilterChain的最后</span></span><br><span class="line">  <span class="keyword">return</span> Network::FilterStatus::StopIteration;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>真正的解码就在dispatchSlice中完成</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">size_t</span> ConnectionImpl::dispatchSlice(<span class="keyword">const</span> <span class="keyword">char</span>* slice, <span class="keyword">size_t</span> len) &#123;</span><br><span class="line">  <span class="keyword">ssize_t</span> rc = http_parser_execute(&amp;parser_, &amp;settings_, slice, len);</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>这里是使用了http_parser这个库来对http包进行解析。ConnectionImpl类中声明了一个http_parser_settings类型的settings对象，这个对象设定了解析http包每个部分应该使用的回调函数。当http包到达envoy时，就会自动调用设定好的回调函数去解析对应的部分，而在解析完http请求行、请求头之后就会确定应该将数据转发到集群中的哪一个host。</p>
+<h2 id="4-请求转发"><a href="#4-请求转发" class="headerlink" title="4. 请求转发"></a>4. 请求转发</h2><p>Envoy的请求转发是在http_parser库处理完http包的请求行和请求头之后进行调用的，通过url判断出应该转发到哪个进群，然后通过负载均衡算法选出目的主机，最后从连接池中选出可用连接，跟选出来的host建立连接，最后发送请求。更加详细的解析可以看<a href="https://blog.csdn.net/surlymo/article/details/82387314" target="_blank" rel="noopener">这个博客</a></p>
+<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><p>总结一下一个http连接建立的过程大致就是：</p>
+</li>
+</ul>
+</li>
+<li>与下游主机建立连接</li>
+<li>读取下游主机发送过来的数据</li>
+<li>遍历Filter，对数据进行处理（下面就以ConnectionManager这个filter作为例子）<ul>
+<li>调用http_parser库对数据进行解析<ul>
+<li>解析完URL和头信息之后就进行再一次的filter过滤（下面就以Route::Filter作为例子）<ul>
+<li>确定集群</li>
+<li>负载均衡，确定发送到的主机</li>
+<li>从连接池中取出与主机对应的连接</li>
+<li>建立连接，发送数据<h2 id="6-参考链接"><a href="#6-参考链接" class="headerlink" title="6. 参考链接"></a>6. 参考链接</h2></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="https://blog.csdn.net/surlymo/article/details/82350106" target="_blank" rel="noopener">【Servicemesh系列】【Envoy源码解析（二）】一个Http请求到响应的全链路（一）</a></li>
+<li><a href="https://blog.csdn.net/surlymo/article/details/82387314" target="_blank" rel="noopener">【Servicemesh系列】【Envoy源码解析（三）】一个Http请求到响应的全链路（二）</a></li>
+<li><a href="https://www.cnblogs.com/arnoldlu/p/6497837.html" target="_blank" rel="noopener">开源HTTP解析器—http-parser和fast-http</a></li>
+<li><a href="https://github.com/nodejs/http-parser" target="_blank" rel="noopener">Github http-parser</a></li>
+</ul>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://czxhenry.github.io">Henry Chan</a>
+            <p>原文链接：<a href="http://czxhenry.github.io/2019/01/01/envoy-8/">http://czxhenry.github.io/2019/01/01/envoy-8/</a>
+            <p>发表日期：<a href="http://czxhenry.github.io/2019/01/01/envoy-8/">January 1st 2019, 4:23:54 pm</a>
+            <p>更新日期：<a href="http://czxhenry.github.io/2019/01/01/envoy-8/">January 8th 2019, 1:55:49 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/12/26/envoy-7/" title= "[Envoy学习笔记]（七）Listener">
+                    <div class="prevTitle">[Envoy学习笔记]（七）Listener</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:812582916@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/CZXHenry" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-概述"><span class="toc-number">1.</span> <span class="toc-text">1. 概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-建立连接"><span class="toc-number">2.</span> <span class="toc-text">2. 建立连接</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-处理流量"><span class="toc-number">3.</span> <span class="toc-text">3. 处理流量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-请求转发"><span class="toc-number">4.</span> <span class="toc-text">4. 请求转发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-总结"><span class="toc-number">5.</span> <span class="toc-text">5. 总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-参考链接"><span class="toc-number">6.</span> <span class="toc-text">6. 参考链接</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 10
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/01</span><a class="archive-post-title" href= "/2019/01/01/envoy-8/" >[Envoy学习笔记]（八）建立连接、处理数据和转发流量</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/26</span><a class="archive-post-title" href= "/2018/12/26/envoy-7/" >[Envoy学习笔记]（七）Listener</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/24</span><a class="archive-post-title" href= "/2018/12/24/envoy-6/" >[Envoy学习笔记]（六） Envoy启动流程</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/13</span><a class="archive-post-title" href= "/2018/12/13/envoy-5/" >[Envoy学习笔记]（五） Envoy项目概述</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/10</span><a class="archive-post-title" href= "/2018/12/10/envoy-4/" >[Envoy学习笔记]（四） 手动编译运行Envoy</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/03</span><a class="archive-post-title" href= "/2018/12/03/envoy-3/" >[Envoy学习笔记]（三）使用Envoy</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/29</span><a class="archive-post-title" href= "/2018/11/29/envoy-2/" >[Envoy学习笔记]（二） 搭建Envoy官方Demo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/29</span><a class="archive-post-title" href= "/2018/11/29/Envoy学习笔记-Envoy是什么/" >[Envoy学习笔记]（一） Envoy是什么</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/14</span><a class="archive-post-title" href= "/2018/10/14/如何利用Hexo搭建博客/" >如何利用Hexo搭建博客</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/13</span><a class="archive-post-title" href= "/2018/10/13/hello-world/" >Hello World</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="Envoy"><span class="iconfont-archer">&#xe606;</span>Envoy</span>
+    
+        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="ServiceMesh"><span class="iconfont-archer">&#xe606;</span>ServiceMesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="技术博客"><span class="iconfont-archer">&#xe606;</span>技术博客</span>
+    
+        <span class="sidebar-tag-name" data-tags="Hexo"><span class="iconfont-archer">&#xe606;</span>Hexo</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="各种教程"><span class="iconfont-archer">&#xe60a;</span>各种教程</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Henry Chan"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+</body>
+</html>
+
+
