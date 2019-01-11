@@ -22,7 +22,7 @@
     <meta name="description" content="">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title>Henry&#39;s Studio</title>
+    <title>[Envoy学习笔记] （九） Dispatcher · Henry&#39;s Studio</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -203,12 +203,23 @@
 </head>
 
     
+        <body class="post-body">
+    
     
 <header class="header">
 
     <div class="read-progress"></div>
     <div class="header-sidebar-menu">&#xe775;</div>
     <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Henry&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">[Envoy学习笔记] （九） Dispatcher</a>
+            </div>
+    </div>
     
     <a class="home-link" href=/>Henry's Studio.</a>
 </header>
@@ -220,24 +231,76 @@
 
 
 
+
+height:50vh;
 ">
     
     <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
             
     <div class="site-intro-placeholder"></div>
-    <div class="site-intro-img" style="background-image: url(/)"></div>
+    <div class="site-intro-img" style="background-image: url(https://source.unsplash.com/random)"></div>
     <div class="site-intro-meta">
         <!-- 标题  -->
         <h1 class="intro-title">
             <!-- 主页  -->
+            
+            [Envoy学习笔记] （九） Dispatcher
+            <!-- 404 -->
             
         </h1>
         <!-- 副标题 -->
         <p class="intro-subtitle">
             <!-- 主页副标题  -->
             
+            
+            <!-- 404 -->
+            
         </p>
         <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "ServiceMesh">ServiceMesh</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.2k</span>阅读时长: <span class="post-count reading-time">4 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/01/11</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
         
     </div>
 </div>
@@ -338,81 +401,80 @@
 </script>        
         <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
         <div class="container container-unloaded">
-            <main class="main index-page">
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2019/01/11/envoy-9/" >
-            
-                <span>[Envoy学习笔记] （九） Dispatcher</span>
-        </a>
-        <div class="abstract-content">
-            
-前一篇大概就是说了Envoy的链接建立、数据处理和请求转发，实际上大部分都是基于《一个http请求到响应的全链路》这篇博客，再用自己的话说出来。加上自己最近精神状态也不是很好，所以看源码的事也一直拖拖拖。不过虽然拖，但是至少也也是每天坚持看一看，终于也把Envoy里面有关Dispatcher和多线程有关的代码给看完了，接下来就又是根据我自己对这些东西的理解来写一写吧
+            <main class="main post-page">
+    <article class="article-entry">
+        <blockquote>
+<p>前一篇大概就是说了Envoy的链接建立、数据处理和请求转发，实际上大部分都是基于《一个http请求到响应的全链路》这篇博客，再用自己的话说出来。加上自己最近精神状态也不是很好，所以看源码的事也一直拖拖拖。不过虽然拖，但是至少也也是每天坚持看一看，终于也把Envoy里面有关Dispatcher和多线程有关的代码给看完了，接下来就又是根据我自己对这些东西的理解来写一写吧</p>
+</blockquote>
+<h2 id="1-Dispatcher"><a href="#1-Dispatcher" class="headerlink" title="1. Dispatcher"></a>1. Dispatcher</h2><p>Dispatcher这个机制我之前完全没有遇到过，也查了很多的资料，大致上也明白了这个是什么东西</p>
+<h3 id="1-1-事件循环机制"><a href="#1-1-事件循环机制" class="headerlink" title="1.1 事件循环机制"></a>1.1 事件循环机制</h3><ul>
+<li>在Envoy里面的Dispatcher实际上就是一个事件循环机制（Eventloop）的实现。这个机制实际上就是让主线程来执行所有非阻塞的任务（即立刻就能获得返回值的工作），而将一些阻塞的任务加入到任务队列中，发生某些事件表明这些阻塞任务能够运行之后再将这些任务从队列中拿出来执行。</li>
+<li>这样做的好处就是主线程不用等待，可以一直执行。</li>
+<li>网上大多数关于Eventloop的文章都是JS中的Eventloop，但是实际上Eventloop只是一种机制或者说是一种思想，并不与语言绑定，所以C++实现的Envoy也可以用这个东西。<h3 id="1-2-为什么Envoy使用Eventloop机制"><a href="#1-2-为什么Envoy使用Eventloop机制" class="headerlink" title="1.2 为什么Envoy使用Eventloop机制"></a>1.2 为什么Envoy使用Eventloop机制</h3></li>
+<li>根据Envoy的主要开发者Matt Klein的说法，使用这样的事件循环机制能够使大多数连接处理代码以近似但单线程的方式运行。</li>
+<li>实际上我自己暂时未能体会到这种使用Eventloop的好处在哪<h2 id="2-Dispatcher运行机制"><a href="#2-Dispatcher运行机制" class="headerlink" title="2. Dispatcher运行机制"></a>2. Dispatcher运行机制</h2>实际上Dispatcher的实现算是挺简单的了，代码并不多，原理就跟前面说的那样</li>
+<li><p><strong>dispatcher_impl.cc</strong></p>
+<ul>
+<li>DispatcherImpl类中包含了一个post_callbacks_成员，这个就是前面所说的任务队列。每个任务实际上就是一个函数对象（这是C++11的新特性，function类型）。然后当Dispatcher启动，即事件循环启动之后，就会不断的从这个队列中取出任务并执行。</li>
+<li><p>DispatcherImpl类提供了接口实现任务的添加，事件循环的启动与退出</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> DispatcherImpl::post(<span class="built_in">std</span>::function&lt;<span class="keyword">void</span>()&gt; callback) &#123;</span><br><span class="line">  <span class="keyword">bool</span> do_post;</span><br><span class="line">  &#123;</span><br><span class="line">    Thread::<span class="function">LockGuard <span class="title">lock</span><span class="params">(post_lock_)</span></span>;</span><br><span class="line">    do_post = post_callbacks_.empty();</span><br><span class="line">    post_callbacks_.push_back(callback);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (do_post) &#123;</span><br><span class="line">    post_timer_-&gt;enableTimer(<span class="built_in">std</span>::chrono::milliseconds(<span class="number">0</span>));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>post用于将任务添加到任务队列。do_post变量指示了队列是不是为空，如果为空的话就设置一个为0的定时器，立刻启动事件循环，开始执行任务。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> DispatcherImpl::run(RunType type) &#123;</span><br><span class="line">  run_tid_ = api_.threadFactory().currentThreadId();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Flush all post callbacks before we run the event loop. We do this because there are post</span></span><br><span class="line">  <span class="comment">// callbacks that have to get run before the initial event loop starts running. libevent does</span></span><br><span class="line">  <span class="comment">// not guarantee that events are run in any particular order. So even if we post() and call</span></span><br><span class="line">  <span class="comment">// event_base_once() before some other event, the other event might get called first.</span></span><br><span class="line">  runPostCallbacks();</span><br><span class="line"></span><br><span class="line">  event_base_loop(base_.get(), type == RunType::NonBlock ? EVLOOP_NONBLOCK : <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>run启动事件循环，实际上一个Dispatcher包含了两个事件循环，一个是Dispatcher自己实现的事件循环，而另一个就是libevent中的事件循环。在这里用runPostCallbacks来启动Dispatcher自己的事件循环，而event_base_loop就启动libevent的事件循环。注释里面其实也是说了先要将所有的callbacks执行完之后再执行libevent的事件循环。因为有可能有些callbacks是初始化event base的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> DispatcherImpl::runPostCallbacks() &#123;</span><br><span class="line">  <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="comment">// It is important that this declaration is inside the body of the loop so that the callback is</span></span><br><span class="line">    <span class="comment">// destructed while post_lock_ is not held. If callback is declared outside the loop and reused</span></span><br><span class="line">    <span class="comment">// for each iteration, the previous iteration's callback is destructed when callback is</span></span><br><span class="line">    <span class="comment">// re-assigned, which happens while holding the lock. This can lead to a deadlock (via</span></span><br><span class="line">    <span class="comment">// recursive mutex acquisition) if destroying the callback runs a destructor, which through some</span></span><br><span class="line">    <span class="comment">// callstack calls post() on this dispatcher.</span></span><br><span class="line">    <span class="built_in">std</span>::function&lt;<span class="keyword">void</span>()&gt; callback;</span><br><span class="line">    &#123;</span><br><span class="line">      Thread::<span class="function">LockGuard <span class="title">lock</span><span class="params">(post_lock_)</span></span>;</span><br><span class="line">      <span class="keyword">if</span> (post_callbacks_.empty()) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      callback = post_callbacks_.front();</span><br><span class="line">      post_callbacks_.pop_front();</span><br><span class="line">    &#125;</span><br><span class="line">    callback();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>runPostCallbacks实际上就是Dispatcher自己的事件循环，不断的从队列中取出任务执行。当所有任务执行完之后就退出这个循环。而当有新的任务来到时再重新启动这个循环，启动的方法就是前面post函数说的设置时间为0的定时器</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>Dispatcher关键的一些机制就是这样了，可以说是比其他东西要来的简单。更详细的解读可以看一下参考链接里面的博客</p>
+<h2 id="3-参考链接"><a href="#3-参考链接" class="headerlink" title="3. 参考链接"></a>3. 参考链接</h2><ul>
+<li><a href="https://yq.aliyun.com/articles/659277" target="_blank" rel="noopener">Envoy源码分析之Dispatcher</a></li>
+<li><a href="https://blog.envoyproxy.io/envoy-threading-model-a8d44b922310" target="_blank" rel="noopener">Envoy threading model</a> 这个网站可能需要科学上网</li>
+</ul>
 
-1. DispatcherDispatcher这个机制我之前完全没有遇到过，也查了很多的资料，大致上也明白了这个是什么东西
-1.1 事件循环机制
-在Envoy里面的Dispatcher实际上就是一个事件循环机制（Even...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/11</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "ServiceMesh">ServiceMesh</a>
-    
-</div>
-            
-        </div>
     </article>
+    <!-- license  -->
     
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2019/01/01/envoy-8/" >
-            
-                <span>[Envoy学习笔记]（八）建立连接、处理数据和转发流量</span>
-        </a>
-        <div class="abstract-content">
-            
-浪了两三天，终于又下定决心开始写Envoy分析博客了。写这些博客的很重要的一个原因就是希望能够帮助我自己更加理解Envoy的各种机制，所以难点不在于把博客写出来而是怎么去理解这些东西。看Envoy的源码是我第一次看源码，所以非常的头大，逃避心理也很严重，但是我应该可以坚持下去的，毕竟这是毕设hhhh
-
-1. 概述
-前一篇博客主要是关于Listener的总结。而这一篇主要就是基于参考链接中的两篇博客，对Envoy处理Http请求的进一步解析。其实这个Http请求到响应的全链路主要是可以分成三大部分的，分别是建立连接、处理数据和转发流量。接下来就会分别对这三个部分的代码进行分析总结。2. ...
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://czxhenry.github.io">Henry Chan</a>
+            <p>原文链接：<a href="http://czxhenry.github.io/2019/01/11/envoy-9/">http://czxhenry.github.io/2019/01/11/envoy-9/</a>
+            <p>发表日期：<a href="http://czxhenry.github.io/2019/01/11/envoy-9/">January 11th 2019, 1:49:05 pm</a>
+            <p>更新日期：<a href="http://czxhenry.github.io/2019/01/11/envoy-9/">January 11th 2019, 3:23:04 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/01</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "ServiceMesh">ServiceMesh</a>
-    
-</div>
-            
-        </div>
-    </article>
     
     <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/01/01/envoy-8/" title= "[Envoy学习笔记]（八）建立连接、处理数据和转发流量">
+                    <div class="prevTitle">[Envoy学习笔记]（八）建立连接、处理数据和转发流量</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
     
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
 </main>
             <!-- profile -->
             
@@ -490,6 +552,24 @@
 </footer>
     </div>
     <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Dispatcher"><span class="toc-number">1.</span> <span class="toc-text">1. Dispatcher</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-事件循环机制"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 事件循环机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-为什么Envoy使用Eventloop机制"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 为什么Envoy使用Eventloop机制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Dispatcher运行机制"><span class="toc-number">2.</span> <span class="toc-text">2. Dispatcher运行机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-参考链接"><span class="toc-number">3.</span> <span class="toc-text">3. 参考链接</span></a></li></ol>
+    </div>
     
     <div class="back-top iconfont-archer">&#xe639;</div>
     <div class="sidebar sidebar-hide">
@@ -780,6 +860,8 @@ jsonContent:
     
     </div>
     <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
      
     <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
