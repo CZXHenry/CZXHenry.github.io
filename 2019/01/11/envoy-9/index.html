@@ -22,7 +22,7 @@
     <meta name="description" content="">
     <meta http-equiv="Cache-control" content="no-cache">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title>[Envoy学习笔记] （九） Dispatcher · Henry&#39;s Studio</title>
+    <title>[Envoy学习笔记]（九） Dispatcher · Henry&#39;s Studio</title>
     <style type="text/css">
     @font-face {
         font-family: 'Oswald-Regular';
@@ -217,7 +217,7 @@
                 <a href="/" >Henry&#39;s Studio.</a>
             </div>
             <div class="post-title">
-                <a href="#" class="post-name">[Envoy学习笔记] （九） Dispatcher</a>
+                <a href="#" class="post-name">[Envoy学习笔记]（九） Dispatcher</a>
             </div>
     </div>
     
@@ -247,7 +247,7 @@ height:50vh;
         <h1 class="intro-title">
             <!-- 主页  -->
             
-            [Envoy学习笔记] （九） Dispatcher
+            [Envoy学习笔记]（九） Dispatcher
             <!-- 404 -->
             
         </h1>
@@ -410,9 +410,14 @@ height:50vh;
 <h3 id="1-1-事件循环机制"><a href="#1-1-事件循环机制" class="headerlink" title="1.1 事件循环机制"></a>1.1 事件循环机制</h3><ul>
 <li>在Envoy里面的Dispatcher实际上就是一个事件循环机制（Eventloop）的实现。这个机制实际上就是让主线程来执行所有非阻塞的任务（即立刻就能获得返回值的工作），而将一些阻塞的任务加入到任务队列中，发生某些事件表明这些阻塞任务能够运行之后再将这些任务从队列中拿出来执行。</li>
 <li>这样做的好处就是主线程不用等待，可以一直执行。</li>
-<li>网上大多数关于Eventloop的文章都是JS中的Eventloop，但是实际上Eventloop只是一种机制或者说是一种思想，并不与语言绑定，所以C++实现的Envoy也可以用这个东西。<h3 id="1-2-为什么Envoy使用Eventloop机制"><a href="#1-2-为什么Envoy使用Eventloop机制" class="headerlink" title="1.2 为什么Envoy使用Eventloop机制"></a>1.2 为什么Envoy使用Eventloop机制</h3></li>
+<li>网上大多数关于Eventloop的文章都是JS中的Eventloop，但是实际上Eventloop只是一种机制或者说是一种思想，并不与语言绑定，所以C++实现的Envoy也可以用这个东西。</li>
+</ul>
+<h3 id="1-2-为什么Envoy使用Eventloop机制"><a href="#1-2-为什么Envoy使用Eventloop机制" class="headerlink" title="1.2 为什么Envoy使用Eventloop机制"></a>1.2 为什么Envoy使用Eventloop机制</h3><ul>
 <li>根据Envoy的主要开发者Matt Klein的说法，使用这样的事件循环机制能够使大多数连接处理代码以近似但单线程的方式运行。</li>
-<li>实际上我自己暂时未能体会到这种使用Eventloop的好处在哪<h2 id="2-Dispatcher运行机制"><a href="#2-Dispatcher运行机制" class="headerlink" title="2. Dispatcher运行机制"></a>2. Dispatcher运行机制</h2>实际上Dispatcher的实现算是挺简单的了，代码并不多，原理就跟前面说的那样</li>
+<li>实际上我自己暂时未能体会到这种使用Eventloop的好处在哪</li>
+</ul>
+<h2 id="2-Dispatcher运行机制"><a href="#2-Dispatcher运行机制" class="headerlink" title="2. Dispatcher运行机制"></a>2. Dispatcher运行机制</h2><p>实际上Dispatcher的实现算是挺简单的了，代码并不多，原理就跟前面说的那样</p>
+<ul>
 <li><p><strong>dispatcher_impl.cc</strong></p>
 <ul>
 <li>DispatcherImpl类中包含了一个post_callbacks_成员，这个就是前面所说的任务队列。每个任务实际上就是一个函数对象（这是C++11的新特性，function类型）。然后当Dispatcher启动，即事件循环启动之后，就会不断的从这个队列中取出任务并执行。</li>
@@ -443,7 +448,7 @@ height:50vh;
             <p>原文作者：<a href="http://czxhenry.github.io">Henry Chan</a>
             <p>原文链接：<a href="http://czxhenry.github.io/2019/01/11/envoy-9/">http://czxhenry.github.io/2019/01/11/envoy-9/</a>
             <p>发表日期：<a href="http://czxhenry.github.io/2019/01/11/envoy-9/">January 11th 2019, 1:49:05 pm</a>
-            <p>更新日期：<a href="http://czxhenry.github.io/2019/01/11/envoy-9/">January 11th 2019, 3:23:04 pm</a>
+            <p>更新日期：<a href="http://czxhenry.github.io/2019/01/11/envoy-9/">January 11th 2019, 3:25:29 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -696,8 +701,6 @@ top:50vh;
     
     
     
-    
-    
     <div class="total-and-search">
         <div class="total-archive">
         Total : 11
@@ -716,7 +719,7 @@ top:50vh;
     
     
         <li class="archive-post-item">
-            <span class="archive-post-date">01/11</span><a class="archive-post-title" href= "/2019/01/11/envoy-9/" >[Envoy学习笔记] （九） Dispatcher</a>
+            <span class="archive-post-date">01/11</span><a class="archive-post-title" href= "/2019/01/11/envoy-9/" >[Envoy学习笔记]（九） Dispatcher</a>
         </li>
     
     
