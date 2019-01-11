@@ -426,7 +426,7 @@ height:50vh;
 <li><strong>main.cc</strong>: 回到Main函数中，可以看到Main函数中使用make_unique创建指向MainCommon对象的时候将在命令行中启动envoy时输入的参数传了进去。</li>
 <li><strong>main_common.cc</strong>: MainCommon的构造函数，则会使用这两个参数来初始化options_对象。</li>
 <li><strong>option_impl.cc</strong>: 两个文件可以看到OptionsImpl中储存了各种envoy命令的参数。而OptionsImpl的构造函数则解析命令行传进来的参数。注意，这个时候单纯是对命令行命令进行解析而已，还没有读取yaml文件</li>
-<li><strong>main_common.cc</strong>: 回过头再看MainCommon的构造函数，发现base<em>对象是利用options</em>来进行初始化的。即options<em>初始化完之后再传给MainCommonBase的构造函数做进一步的读取配置。然后看MainCommonBase的构造函数，可以发现MainCommonBase同样包含了一个OptionImpl对象，所以直接使用传进来的Options对象来进行拷贝构造。一直看下去，可以看到这里并没有读取yaml文件中的配置，而是用来进行了一些简单的判断，之后就把options</em>传给server_对象了</li>
+<li><strong>main_common.cc</strong>: 回过头再看MainCommon的构造函数，发现base_对象是利用options_来进行初始化的。即options_初始化完之后再传给MainCommonBase的构造函数做进一步的读取配置。然后看MainCommonBase的构造函数，可以发现MainCommonBase同样包含了一个OptionImpl对象，所以直接使用传进来的Options对象来进行拷贝构造。一直看下去，可以看到这里并没有读取yaml文件中的配置，而是用来进行了一些简单的判断，之后就把options_传给server_对象了</li>
 <li><strong>server.cc</strong>: <ul>
 <li>server_是InstanceImpl类对象。InstanceImpl构造函数并没有做很多的初始化，更多的工作是在Initialize函数中完成的。</li>
 <li>Initialize函数中调用了InstanceUtil::loadBootstrapConfig函数来读取yaml文件中的配置。这里的配置全部读取到一个boostrap_对象中。这个对象的类型是envoy::config::bootstrap::v2::Bootstrap，这个类型是自动生成的。因为Envoy使用protobuf作为数据交换的格式，Envoy定义了boostrap.proto文件，而利用这个文件就可以生成对应的C++类了。</li>
@@ -607,6 +607,8 @@ top:50vh;
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
     
     
     

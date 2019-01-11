@@ -407,7 +407,9 @@ height:50vh;
 <p>Worker这一部分实际上也是比较容易懂的，就是调用堆栈深（比如绑定Listener和Worker，调用了好几层才真正创建Listener）和lambda函数调用这里有点绕。其次，我觉得自己仿照Envoy的实现机制去写个小Demo对帮助理解Envoy的原理也是很有用的</p>
 </blockquote>
 <h2 id="1-Worker"><a href="#1-Worker" class="headerlink" title="1. Worker"></a>1. Worker</h2><ul>
-<li>Envoy中的Worker类我觉得可以理解成为一种对线程的封装。Envoy的工作线程负责每个Listener、接受新连接、为每个连接实例过滤器栈，以及处理所有连接生命周期内IO事件。这也允许大多数连接处理代码以近似单线程运行。<h2 id="2-Worker工作原理"><a href="#2-Worker工作原理" class="headerlink" title="2. Worker工作原理"></a>2. Worker工作原理</h2></li>
+<li>Envoy中的Worker类我觉得可以理解成为一种对线程的封装。Envoy的工作线程负责每个Listener、接受新连接、为每个连接实例过滤器栈，以及处理所有连接生命周期内IO事件。这也允许大多数连接处理代码以近似单线程运行。</li>
+</ul>
+<h2 id="2-Worker工作原理"><a href="#2-Worker工作原理" class="headerlink" title="2. Worker工作原理"></a>2. Worker工作原理</h2><ul>
 <li><p><strong>listener_manager_impl.cc</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ListenerManagerImpl::ListenerManagerImpl(Instance&amp; server,</span><br><span class="line">                                       ListenerComponentFactory&amp; listener_factory,</span><br><span class="line">                                       WorkerFactory&amp; worker_factory, TimeSource&amp; time_source)</span><br><span class="line">  : server_(server), time_source_(time_source), factory_(listener_factory),</span><br><span class="line">      stats_(generateStats(server.stats())),</span><br><span class="line">      config_tracker_entry_(server.admin().getConfigTracker().add(</span><br><span class="line">          <span class="string">"listeners"</span>, [<span class="keyword">this</span>] &#123; <span class="keyword">return</span> dumpListenerConfigs(); &#125;)) &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">uint32_t</span> i = <span class="number">0</span>; i &lt; server.options().concurrency(); i++) &#123;</span><br><span class="line">    workers_.emplace_back(worker_factory.createWorker(server.overloadManager()));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <ul>
@@ -447,7 +449,7 @@ height:50vh;
             <p>原文作者：<a href="http://czxhenry.github.io">Henry Chan</a>
             <p>原文链接：<a href="http://czxhenry.github.io/2019/01/11/envoy-10/">http://czxhenry.github.io/2019/01/11/envoy-10/</a>
             <p>发表日期：<a href="http://czxhenry.github.io/2019/01/11/envoy-10/">January 11th 2019, 3:26:58 pm</a>
-            <p>更新日期：<a href="http://czxhenry.github.io/2019/01/11/envoy-10/">January 11th 2019, 8:12:26 pm</a>
+            <p>更新日期：<a href="http://czxhenry.github.io/2019/01/11/envoy-10/">January 11th 2019, 8:14:43 pm</a>
             <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
         </div>
     
@@ -585,6 +587,8 @@ top:50vh;
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
     
     
     

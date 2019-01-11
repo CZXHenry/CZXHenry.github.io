@@ -368,8 +368,10 @@ height:50vh;
 Worker这一部分实际上也是比较容易懂的，就是调用堆栈深（比如绑定Listener和Worker，调用了好几层才真正创建Listener）和lambda函数调用这里有点绕。其次，我觉得自己仿照Envoy的实现机制去写个小Demo对帮助理解Envoy的原理也是很有用的
 
 1. Worker
-Envoy中的Worker类我觉得可以理解成为一种对线程的封装。Envoy的工作线程负责每个Listener、接受新连接、为每个连接实例过滤器栈，以及处理所有连接生命周期内IO事件。这也允许大多数连接处理代码以近似单线程运行。2. Worker工作原理
-listener_manager_impl.c...
+Envoy中的Worker类我觉得可以理解成为一种对线程的封装。Envoy的工作线程负责每个Listener、接受新连接、为每个连接实例过滤器栈，以及处理所有连接生命周期内IO事件。这也允许大多数连接处理代码以近似单线程运行。
+
+2. Worker工作原理
+listener_manager_impl...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
@@ -711,8 +713,9 @@ Git： 1.8.3.1
         <div class="abstract-content">
             
 FBI WARNING: 这篇文章主要是当做个人总结之用，所以如果是刚接触Envoy完全对Envoy没概念的话，建议先看参考链接里面的“浅谈Service Mesh体系中的Envoy”这篇博文，非常的详细，写的很好
+
 1. Envoy概述说白了，Envoy就是一个 网络代理 ，跟Nginx等代理差不多，核心都是为了完成请求的转发。而Envoy主要是为了大型现代SOA（面向服务架构）架构设计的。
-2. Envoy的作用前面已经说过，Envoy是一个为大型现代SOA架构设计的网络代理，所以Envoy最主要的目的就是使服务之间的通信变得透明。意思即是，服务本身并不需要关注服务之间通信的情况，服...
+2. Envoy的作用前面已经说过，Envoy是一个为大型现代SOA架构设计的网络代理，所以Envoy最主要的目的就是使服务之间的通信变得透明。意思即是，服务本身并不需要关注服务之间通信的情况，...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
@@ -916,6 +919,8 @@ FBI WARNING: 这篇文章主要是当做个人总结之用，所以如果是刚�
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
     
     
     

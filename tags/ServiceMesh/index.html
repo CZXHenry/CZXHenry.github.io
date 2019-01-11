@@ -355,8 +355,10 @@
 Worker这一部分实际上也是比较容易懂的，就是调用堆栈深（比如绑定Listener和Worker，调用了好几层才真正创建Listener）和lambda函数调用这里有点绕。其次，我觉得自己仿照Envoy的实现机制去写个小Demo对帮助理解Envoy的原理也是很有用的
 
 1. Worker
-Envoy中的Worker类我觉得可以理解成为一种对线程的封装。Envoy的工作线程负责每个Listener、接受新连接、为每个连接实例过滤器栈，以及处理所有连接生命周期内IO事件。这也允许大多数连接处理代码以近似单线程运行。2. Worker工作原理
-listener_manager_impl.c...
+Envoy中的Worker类我觉得可以理解成为一种对线程的封装。Envoy的工作线程负责每个Listener、接受新连接、为每个连接实例过滤器栈，以及处理所有连接生命周期内IO事件。这也允许大多数连接处理代码以近似单线程运行。
+
+2. Worker工作原理
+listener_manager_impl...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
@@ -607,6 +609,8 @@ En...
     <div class="sidebar-content sidebar-content-show-archive">
           <div class="sidebar-panel-archives">
     <!-- 在ejs中将archive按照时间排序 -->
+    
+    
     
     
     
