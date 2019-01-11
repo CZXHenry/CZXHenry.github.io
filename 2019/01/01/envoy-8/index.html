@@ -422,7 +422,7 @@ height:50vh;
 <ul>
 <li>ConnectionImpl的类构造函数会注册文件读写事件，当事件到来的时候就调用onFileEvent</li>
 <li>在OnFileEvent函数中会判断具体是什么事件触发的这个函数，然后根据不同事件调用不同的函数。比如读事件就调用onReadReady函数，写事件就调用onWriteReady函数</li>
-<li>在onReadReady函数中，调用doRead函数进行真正的数据读取，将数据读取到Connection的read_buffer_中。读取完之后再根据读取的结果做进一步的操作。当确定读取到有数据时，则会继续调用onRead对数据作进一步处理；如果连接已经被客户关闭且没有多余的数据要处理则关闭Socket</li>
+<li>在onReadReady函数中，调用doRead函数进行真正的数据读取，将数据读取到Connection的read<em>buffer</em>中。读取完之后再根据读取的结果做进一步的操作。当确定读取到有数据时，则会继续调用onRead对数据作进一步处理；如果连接已经被客户关闭且没有多余的数据要处理则关闭Socket</li>
 <li>onWriteReady函数也跟onReadReady函数差不多，都是调用了另外一个doWrite函数去完成真实的写操作。然后再根据写入的结果来确定下一步的操作<br>到此一个连接已经完全建立了，注册了读写函数，会在接收到读写事件之后自动调用各种处理流程，下一步就如何处理接收到的流量了<h2 id="3-处理流量"><a href="#3-处理流量" class="headerlink" title="3. 处理流量"></a>3. 处理流量</h2></li>
 </ul>
 </li>
@@ -430,7 +430,7 @@ height:50vh;
 <li><p><strong>connection_impl.cc</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">void</span> ConnectionImpl::onRead(<span class="keyword">uint64_t</span> read_buffer_size) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!read_enabled_) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (read_buffer_size == <span class="number">0</span> &amp;&amp; !read_end_stream_) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (read_end_stream_) &#123;</span><br><span class="line">    <span class="comment">// read() on a raw socket will repeatedly return 0 (EOF) once EOF has</span></span><br><span class="line">    <span class="comment">// occurred, so filter out the repeats so that filters don't have</span></span><br><span class="line">    <span class="comment">// to handle repeats.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// I don't know of any cases where this actually happens (we should stop</span></span><br><span class="line">    <span class="comment">// reading the socket after EOF), but this check guards against any bugs</span></span><br><span class="line">    <span class="comment">// in ConnectionImpl or strangeness in the OS events (epoll, kqueue, etc)</span></span><br><span class="line">    <span class="comment">// and maintains the guarantee for filters.</span></span><br><span class="line">    <span class="keyword">if</span> (read_end_stream_raised_) &#123;</span><br><span class="line">      <span class="comment">// No further data can be delivered after end_stream</span></span><br><span class="line">      ASSERT(read_buffer_size == <span class="number">0</span>);</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    read_end_stream_raised_ = <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  filter_manager_.onRead();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <ul>
-<li>onRead函数大部分就是判断是否有读到了数据之类的，真正的对数据处理又是调用了filter_manager_.onRead()</li>
+<li>onRead函数大部分就是判断是否有读到了数据之类的，真正的对数据处理又是调用了filter<em>manager</em>.onRead()</li>
 </ul>
 </li>
 <li><p><strong>filter_manager_impl.cc</strong></p>
@@ -471,7 +471,7 @@ height:50vh;
 </li>
 <li><a href="https://blog.csdn.net/surlymo/article/details/82350106" target="_blank" rel="noopener">【Servicemesh系列】【Envoy源码解析（二）】一个Http请求到响应的全链路（一）</a></li>
 <li><a href="https://blog.csdn.net/surlymo/article/details/82387314" target="_blank" rel="noopener">【Servicemesh系列】【Envoy源码解析（三）】一个Http请求到响应的全链路（二）</a></li>
-<li><a href="https://www.cnblogs.com/arnoldlu/p/6497837.html" target="_blank" rel="noopener">开源HTTP解析器—http-parser和fast-http</a></li>
+<li><a href="https://www.cnblogs.com/arnoldlu/p/6497837.html" target="_blank" rel="noopener">开源HTTP解析器—-http-parser和fast-http</a></li>
 <li><a href="https://github.com/nodejs/http-parser" target="_blank" rel="noopener">Github http-parser</a></li>
 </ul>
 
@@ -740,9 +740,20 @@ top:50vh;
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 11
+        Total : 12
         </div>
         <!-- search  -->
         
@@ -755,6 +766,11 @@ top:50vh;
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/11</span><a class="archive-post-title" href= "/2019/01/11/envoy-10/" >[Envoy学习笔记]（十）Worker</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -827,9 +843,9 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="Envoy"><span class="iconfont-archer">&#xe606;</span>Envoy</span>
     
-        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
-    
         <span class="sidebar-tag-name" data-tags="ServiceMesh"><span class="iconfont-archer">&#xe606;</span>ServiceMesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
     
         <span class="sidebar-tag-name" data-tags="技术博客"><span class="iconfont-archer">&#xe606;</span>技术博客</span>
     

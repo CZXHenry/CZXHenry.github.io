@@ -346,6 +346,42 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href = "/2019/01/11/envoy-10/" >
+            
+                <span>[Envoy学习笔记]（十）Worker</span>
+        </a>
+        <div class="abstract-content">
+            
+Worker这一部分实际上也是比较容易懂的，就是调用堆栈深（比如绑定Listener和Worker，调用了好几层才真正创建Listener）和lambda函数调用这里有点绕。其次，我觉得自己仿照Envoy的实现机制去写个小Demo对帮助理解Envoy的原理也是很有用的
+
+1. Worker
+Envoy中的Worker类我觉得可以理解成为一种对线程的封装。Envoy的工作线程负责每个Listener、接受新连接、为每个连接实例过滤器栈，以及处理所有连接生命周期内IO事件。这也允许大多数连接处理代码以近似单线程运行。2. Worker工作原理
+listener_manager_impl.c...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/11</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "ServiceMesh">ServiceMesh</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href = "/2019/01/11/envoy-9/" >
             
                 <span>[Envoy学习笔记]（九） Dispatcher</span>
@@ -662,9 +698,8 @@ Git： 1.8.3.1
         <div class="abstract-content">
             
 FBI WARNING: 这篇文章主要是当做个人总结之用，所以如果是刚接触Envoy完全对Envoy没概念的话，建议先看参考链接里面的“浅谈Service Mesh体系中的Envoy”这篇博文，非常的详细，写的很好
-
 1. Envoy概述说白了，Envoy就是一个 网络代理 ，跟Nginx等代理差不多，核心都是为了完成请求的转发。而Envoy主要是为了大型现代SOA（面向服务架构）架构设计的。
-2. Envoy的作用前面已经说过，Envoy是一个为大型现代SOA架构设计的网络代理，所以Envoy最主要的目的就是使服务之间的通信变得透明。意思即是，服务本身并不需要关注服务之间通信的情况，...
+2. Envoy的作用前面已经说过，Envoy是一个为大型现代SOA架构设计的网络代理，所以Envoy最主要的目的就是使服务之间的通信变得透明。意思即是，服务本身并不需要关注服务之间通信的情况，服...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
@@ -678,39 +713,6 @@ FBI WARNING: 这篇文章主要是当做个人总结之用，所以如果是刚�
         <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
     
         <a class="post-tag" href="javascript:void(0);" data-tags = "Service Mesh">Service Mesh</a>
-    
-</div>
-            
-        </div>
-    </article>
-    
-    
-    
-    
-    
-    
-    <article class="index-post">
-        <a class="abstract-title" href = "/2018/10/14/如何利用Hexo搭建博客/" >
-            
-                <span>如何利用Hexo搭建博客</span>
-        </a>
-        <div class="abstract-content">
-            之前使用过Jeklly+Git Page搭建个人博客，但是不得不说Jeklly是真的太难用了，有时连一些很基本的markdown语法都不支持，更加不用说公式之类的。后来听说Hexo不错，这两天捣鼓了一下，不得不说各种Hexo主题真的是高大上，现在也弄得七七八八了，所以大概记录一下搭建过程吧。
-安装Hexo1. 安装 Node.js因为这个我之前已经装好了，所以具体装法就要靠大家摸索了
-2. 安装 Git这个到Git官网上看看教程装下应该可以了，注意下将密钥添加到GitHub之后可能会出现的 Permission Denied 问题，我记得好像是缺少某个文件造成的，新建一个就行，具体还是百...
-        </div>
-        <div class="abstract-post-meta">
-            <!-- date  -->
-            <div class="abstract-date">
-                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/10/14</span>
-            </div>
-            <!-- tags  -->
-            
-            <div class= abstract-tags >
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "技术博客">技术博客</a>
-    
-        <a class="post-tag" href="javascript:void(0);" data-tags = "Hexo">Hexo</a>
     
 </div>
             
@@ -926,9 +928,20 @@ FBI WARNING: 这篇文章主要是当做个人总结之用，所以如果是刚�
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 11
+        Total : 12
         </div>
         <!-- search  -->
         
@@ -941,6 +954,11 @@ FBI WARNING: 这篇文章主要是当做个人总结之用，所以如果是刚�
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/11</span><a class="archive-post-title" href= "/2019/01/11/envoy-10/" >[Envoy学习笔记]（十）Worker</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -1013,9 +1031,9 @@ FBI WARNING: 这篇文章主要是当做个人总结之用，所以如果是刚�
     
         <span class="sidebar-tag-name" data-tags="Envoy"><span class="iconfont-archer">&#xe606;</span>Envoy</span>
     
-        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
-    
         <span class="sidebar-tag-name" data-tags="ServiceMesh"><span class="iconfont-archer">&#xe606;</span>ServiceMesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
     
         <span class="sidebar-tag-name" data-tags="技术博客"><span class="iconfont-archer">&#xe606;</span>技术博客</span>
     

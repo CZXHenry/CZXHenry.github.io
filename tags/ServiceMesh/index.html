@@ -346,6 +346,42 @@
     
     
     <article class="index-post">
+        <a class="abstract-title" href = "/2019/01/11/envoy-10/" >
+            
+                <span>[Envoy学习笔记]（十）Worker</span>
+        </a>
+        <div class="abstract-content">
+            
+Worker这一部分实际上也是比较容易懂的，就是调用堆栈深（比如绑定Listener和Worker，调用了好几层才真正创建Listener）和lambda函数调用这里有点绕。其次，我觉得自己仿照Envoy的实现机制去写个小Demo对帮助理解Envoy的原理也是很有用的
+
+1. Worker
+Envoy中的Worker类我觉得可以理解成为一种对线程的封装。Envoy的工作线程负责每个Listener、接受新连接、为每个连接实例过滤器栈，以及处理所有连接生命周期内IO事件。这也允许大多数连接处理代码以近似单线程运行。2. Worker工作原理
+listener_manager_impl.c...
+        </div>
+        <div class="abstract-post-meta">
+            <!-- date  -->
+            <div class="abstract-date">
+                <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/01/11</span>
+            </div>
+            <!-- tags  -->
+            
+            <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Envoy">Envoy</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "ServiceMesh">ServiceMesh</a>
+    
+</div>
+            
+        </div>
+    </article>
+    
+    
+    
+    
+    
+    
+    <article class="index-post">
         <a class="abstract-title" href = "/2019/01/11/envoy-9/" >
             
                 <span>[Envoy学习笔记]（九） Dispatcher</span>
@@ -686,9 +722,20 @@ En...
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 11
+        Total : 12
         </div>
         <!-- search  -->
         
@@ -701,6 +748,11 @@ En...
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/11</span><a class="archive-post-title" href= "/2019/01/11/envoy-10/" >[Envoy学习笔记]（十）Worker</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -773,9 +825,9 @@ En...
     
         <span class="sidebar-tag-name" data-tags="Envoy"><span class="iconfont-archer">&#xe606;</span>Envoy</span>
     
-        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
-    
         <span class="sidebar-tag-name" data-tags="ServiceMesh"><span class="iconfont-archer">&#xe606;</span>ServiceMesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
     
         <span class="sidebar-tag-name" data-tags="技术博客"><span class="iconfont-archer">&#xe606;</span>技术博客</span>
     

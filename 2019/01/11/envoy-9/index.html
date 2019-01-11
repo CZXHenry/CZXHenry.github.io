@@ -420,7 +420,7 @@ height:50vh;
 <ul>
 <li><p><strong>dispatcher_impl.cc</strong></p>
 <ul>
-<li>DispatcherImpl类中包含了一个post_callbacks_成员，这个就是前面所说的任务队列。每个任务实际上就是一个函数对象（这是C++11的新特性，function类型）。然后当Dispatcher启动，即事件循环启动之后，就会不断的从这个队列中取出任务并执行。</li>
+<li>DispatcherImpl类中包含了一个post<em>callbacks</em>成员，这个就是前面所说的任务队列。每个任务实际上就是一个函数对象（这是C++11的新特性，function类型）。然后当Dispatcher启动，即事件循环启动之后，就会不断的从这个队列中取出任务并执行。</li>
 <li><p>DispatcherImpl类提供了接口实现任务的添加，事件循环的启动与退出</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> DispatcherImpl::post(<span class="built_in">std</span>::function&lt;<span class="keyword">void</span>()&gt; callback) &#123;</span><br><span class="line">  <span class="keyword">bool</span> do_post;</span><br><span class="line">  &#123;</span><br><span class="line">    Thread::<span class="function">LockGuard <span class="title">lock</span><span class="params">(post_lock_)</span></span>;</span><br><span class="line">    do_post = post_callbacks_.empty();</span><br><span class="line">    post_callbacks_.push_back(callback);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (do_post) &#123;</span><br><span class="line">    post_timer_-&gt;enableTimer(<span class="built_in">std</span>::chrono::milliseconds(<span class="number">0</span>));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
@@ -455,6 +455,11 @@ height:50vh;
     <!-- paginator  -->
     <ul class="post-paginator">
         <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2019/01/11/envoy-10/" title= "[Envoy学习笔记]（十）Worker">
+                    <div class="nextTitle">[Envoy学习笔记]（十）Worker</div>
+                </a>
             
         </li>
         <li class="previous">
@@ -701,9 +706,20 @@ top:50vh;
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 11
+        Total : 12
         </div>
         <!-- search  -->
         
@@ -716,6 +732,11 @@ top:50vh;
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/11</span><a class="archive-post-title" href= "/2019/01/11/envoy-10/" >[Envoy学习笔记]（十）Worker</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -788,9 +809,9 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="Envoy"><span class="iconfont-archer">&#xe606;</span>Envoy</span>
     
-        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
-    
         <span class="sidebar-tag-name" data-tags="ServiceMesh"><span class="iconfont-archer">&#xe606;</span>ServiceMesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
     
         <span class="sidebar-tag-name" data-tags="技术博客"><span class="iconfont-archer">&#xe606;</span>技术博客</span>
     

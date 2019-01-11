@@ -439,8 +439,9 @@ height:50vh;
 <li><strong>extensions/:</strong> Envoy核心代码的扩展。接下来会再介绍这个文件夹的文件结构</li>
 <li><strong>server/:</strong> 针对启动Envoy的代码。例如配置、服务器启动、工作线程等等。随着时间推移，common/和server/之间的划分也模糊了。希望大家能够认真分辨代码应该放在common/还是server/中<blockquote>
 <p><strong>Attention</strong> 原文的Code specific to running Envoy as a standalone server不太明白</p>
+<h3 id="2-3-test-文件夹"><a href="#2-3-test-文件夹" class="headerlink" title="2.3 test/文件夹"></a>2.3 test/文件夹</h3><p>这里不会详细描述test文件夹中的所有目录，只会描述一些重点的</p>
 </blockquote>
-<h3 id="2-3-test-文件夹"><a href="#2-3-test-文件夹" class="headerlink" title="2.3 test/文件夹"></a>2.3 test/文件夹</h3>这里不会详细描述test文件夹中的所有目录，只会描述一些重点的</li>
+</li>
 <li>名字与source中的目录对应的目录包含了单元测试，比如common/、exe/和server/</li>
 <li>扩展对应的测试也放在extensions/中</li>
 <li>integration/目录包含端到端集成测试，这些测试模拟了比较真实的Envoy使用环境，包括了模拟的下游客户和上游服务器。集成测试同样测试了这个仓库中的一些扩展。需要注意的是以后我们更希望有能够单纯针对扩展的集成测试，而不需要覆盖Envoy核心功能。<blockquote>
@@ -734,9 +735,20 @@ top:50vh;
     
     
     
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <div class="total-and-search">
         <div class="total-archive">
-        Total : 11
+        Total : 12
         </div>
         <!-- search  -->
         
@@ -749,6 +761,11 @@ top:50vh;
     
     <div class="archive-year"> 2019 </div>
     <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">01/11</span><a class="archive-post-title" href= "/2019/01/11/envoy-10/" >[Envoy学习笔记]（十）Worker</a>
+        </li>
     
     
         <li class="archive-post-item">
@@ -821,9 +838,9 @@ top:50vh;
     
         <span class="sidebar-tag-name" data-tags="Envoy"><span class="iconfont-archer">&#xe606;</span>Envoy</span>
     
-        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
-    
         <span class="sidebar-tag-name" data-tags="ServiceMesh"><span class="iconfont-archer">&#xe606;</span>ServiceMesh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Service Mesh"><span class="iconfont-archer">&#xe606;</span>Service Mesh</span>
     
         <span class="sidebar-tag-name" data-tags="技术博客"><span class="iconfont-archer">&#xe606;</span>技术博客</span>
     
